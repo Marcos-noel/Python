@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KEPROBA Export Assistant</title>
+
+ <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+
+  <style>
+
+
+
+    :root {
+      --default-font: "Roboto",  system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+      --heading-font: "Raleway",  sans-serif;
+      --nav-font: "Poppins",  sans-serif;
+    }
+
+    :root {
+      --background-color: #121a1e;       /* True black background */
+      --default-color: #E5E5E5;          /* Light gray text for readability */
+      --heading-color: #FFFFFF;          /* White headings */
+      --accent-color: #10A37F;           /* OpenAI green accent */
+      --surface-color: #1A1A1A;          /* Dark gray surfaces/cards */
+      --contrast-color: #FFFFFF;         /* High contrast white */
+    }
+
+    /* Color Presets - These classes override global colors when applied to any section or element, providing reuse of the sam color scheme. */
+    
+    .light-background {
+      --background-color: #e6edf0;
+      --surface-color: #ffffff;
+    }
+
+    
+    /* Smooth scroll */
+    :root {
+      scroll-behavior: smooth;
+    }
+
+
+    body {
+      color: var(--default-color);
+      background-image: url('assets/image/lighthouse-8173576.jpg');
+      font-family: var(--default-font);
+      position: center;
+    }
+
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      color: var(--heading-color);
+      font-family: var(--heading-font);
+      margin-left: 295px;
+    }
+
+    
+    #chatbox {
+
+      font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: var(--heading-color);
+  position: relative;
+  padding-left: 15px;
+      width: 90%;
+      max-width: 600px;
+      background: #302c2c;
+      border: 1px solid #181616;
+      padding: 1rem;
+      height: 400px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      margin-left: 275px;
+    }
+    .message {
+      padding: 0.5rem;
+      margin: 0.3rem 0;
+      border-radius: 5px;
+      max-width: 80%;
+      word-wrap: break-word;
+      
+    }
+    .user {
+      background: #b16972;
+      align-self: flex-end;
+    }
+    .bot {
+      background: #00843D;
+      align-self: flex-start;
+    }
+    #loader {
+      margin-top: 0.5rem;
+      display: none;
+      font-style: italic;
+      color: #555;
+    }
+    .input-container {
+      margin-top: 1rem;
+      display: flex;
+      width: 90%;
+      max-width: 600px;
+    }
+    #user-input {
+      flex: 1;
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin-left: 275px;
+    }
+    #send-button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      margin-left: 0.5rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1></h1>
+
+  <div id="chatbox"></div>
+  <div id="loader">Thinking...</div>
+
+  <div class="input-container">
+    <input type="text" id="user-input" placeholder="Type your export question..." />
+    <button id="send-button">Ask</button>
+  </div>
+
+
+  <!-- Vendor JS Files -->
+  <!-- <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+  <script src="assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
+  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script> -->
+
+  <!-- Vendor1 JS Files -->
+  <script src="assets/vendor copy/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor copy/php-email-form/validate.js"></script>
+  <script src="assets/vendor copy/aos/aos.js"></script>
+  <script src="assets/vendor copy/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor copy/imagesloaded/imagesloaded.pkgd.min.js"></script>
+  <script src="assets/vendor copy/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="assets/vendor copy/waypoints/noframework.waypoints.js"></script>
+  <script src="assets/vendor copy/swiper/swiper-bundle.min.js"></script>
+
+
+
+  <script src="app.js"></script>
+</body>
+</html>
