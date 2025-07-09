@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KEPROBA ASSISTANT</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Floating button */
+    .chat-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 999;
+    }
+
+    /* Hide/show chatbot */
+    .chat-container {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      display: none;
+      z-index: 1000;
+    }
+
+    .chat-container.active {
+      display: flex;
+    }
+
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+      padding-left: 10px;
+    }
+
+    .typing-indicator span {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin: 0 2px;
+      background-color: #ccc;
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .typing-indicator span:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+    .typing-indicator span:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+  </style>
+</head>
+<body>
+  
+
+  <!-- Chat Toggle Button -->
+  <button class="chat-toggle" id="toggleChat"><img src="assets/image/123-128.webp" alt="" width="40px" height="40px"></button>
+
+  <!-- Chatbot UI -->
+  <div class="chat-container" id="chatContainer">
+    <div class="chat-box" id="chatBox"></div>
+    <div class="chat-input">
+      <input type="text" id="userInput" placeholder="Ask your question...">
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const toggleChat = document.getElementById("toggleChat");
+    const chatContainer = document.getElementById("chatContainer");
+    const chatBox = document.getElementById("chatBox");
+    const userInput = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
+
+    // Toggle visibility
+    toggleChat.addEventListener("click", () => {
+      chatContainer.classList.toggle("active");
+    });
+
+    function appendMessage(text, sender) {
+      const message = document.createElement("div");
+      message.classList.add("message", sender);
+
+      const bubble = document.createElement("div");
+      bubble.classList.add("bubble");
+      bubble.innerHTML = text;
+
+      const timestamp = document.createElement("span");
+      timestamp.classList.add("timestamp");
+      timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      message.appendChild(bubble);
+      message.appendChild(timestamp);
+
+      chatBox.appendChild(message);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendQuestion() {
+      const question = userInput.value.trim();
+      if (!question) return;
+
+      appendMessage(question, "user");
+      userInput.value = "";
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/ask", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ question })
+        });
+
+        const data = await response.json();
+
+        if (data.redirect) {
+          appendMessage(
+            `I'm not confident about the answer. Please contact the <strong>${data.department}</strong> at <a href='${data.redirect}' target='_blank'>${data.redirect}</a>.`,
+            "bot"
+          );
+        } else if (data.answer) {
+          appendMessage(data.answer, "bot");
+        } else {
+          appendMessage("Sorry, I couldn't understand your request.", "bot");
+        }
+
+      } catch (error) {
+        console.error(error);
+        appendMessage("Sorry, I could not process your request.", "bot");
+      }
+    }
+
+    sendBtn.addEventListener("click", sendQuestion);
+    userInput.addEventListener("keypress", function(event) {
+      if (event.key === "Enter") sendQuestion();
+    });
+  </script>
+
+  
+</body>
+</html>
