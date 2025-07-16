@@ -17,7 +17,7 @@ body {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  background-color: #007bff;
+  background-color: #13a345;
   color: white;
   width: 56px;
   height: 56px;
@@ -91,13 +91,13 @@ body {
 
 /* Bot bubble style */
 .message.bot .bubble {
-  background-color: #e5f6ff;
+  background-color: #ccc;
   color: #003344;
 }
 
 /* User bubble style */
 .message.user .bubble {
-  background-color: #007bff;
+  background-color: #bf0505;
   color: #ffffff;
 }
 
@@ -129,13 +129,13 @@ body {
 }
 
 .chat-input input[type="text"]:focus {
-  border-color: #007bff;
+  border-color: #121915;
 }
 
 .chat-input button {
   margin-left: 10px;
   padding: 12px 20px;
-  background-color: #007bff;
+  background-color: #d32000;
   color: white;
   border: none;
   border-radius: 20px;
@@ -144,7 +144,7 @@ body {
 }
 
 .chat-input button:hover {
-  background-color: #0056b3;
+  background-color: #b38600;
 }
 
 /* Scrollbar styling */
@@ -175,7 +175,7 @@ body {
 }
 .typing-indicator span {
   display: inline-block;
-  background: #aaa;
+  background: #13a345;
   border-radius: 50%;
   width: 8px;
   height: 8px;
@@ -194,5 +194,20 @@ body {
   }
   40% {
     opacity: 1;
+  }
+}
+
+.blinking-cursor {
+  margin-left: 5px;
+  background-color: #fff;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  50.1%, 100% {
+    opacity: 0;
   }
 }
