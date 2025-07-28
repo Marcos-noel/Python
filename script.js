@@ -23,10 +23,10 @@ document.addEventListener('DOMContentLoaded', () => {
       userInput.value = '';}
   
       // Show typing placeholder
-      const typingId = appendMessage('bot', 'Typing...');
+      const typingId = appendMessage('Hello, Welcome to our site, if you need help simply reply to this message, we are online and ready to help.');
   
       // Send to backend
-      fetch('http://localhost:5000/ask', {
+      fetch('http://127.0.0.1:8000/ask', {
         method: 'POST',
       }
     )

@@ -1,16 +1,35 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from difflib import get_close_matches
 import httpx
 import csv
 import asyncio
 import datetime
 import os
+import pandas as pd
+from fastapi.responses import JSONResponse
+from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import word_tokenize
+import nltk
+from textblob import TextBlob
+
+nltk.download("punkt")
+nltk.download("wordnet")
+
+lemmatizer = WordNetLemmatizer()
+
+def correct_typos(text):
+    return str(TextBlob(text).correct())
+
+def normalize_text(text):
+    tokens = word_tokenize(text.lower())
+    return " ".join([lemmatizer.lemmatize(token) for token in tokens])
 
 app = FastAPI(
     title="KEPROBA Export Assistant",
     description="Official KEPROBA AI Chat Assistant for export, trade, and market advisory.",
-    version="3.0.0"
+    version="5.0.0"
 )
 
 app.add_middleware(
@@ -42,6 +61,16 @@ except FileNotFoundError:
 # Caching
 cache = {}
 
+def get_fuzzy_answer(q: str) -> str | None:
+    rules = {
+        "ucr fee": "Each UCR costs USD 10...",
+        "registration fee": "Registration is USD 50 annually...",
+    }
+    matches = get_close_matches(q.lower(), rules.keys(), n=1, cutoff=0.6)
+    if matches:
+        return rules[matches[0]]
+    return None
+
 # Rule-based Q&A
 def get_rule_based_answer(q: str) -> str | None:
     rules = {
@@ -61,7 +90,6 @@ def get_rule_based_answer(q: str) -> str | None:
         "processing time":"Permit processing times: Standard goods: ~3–5 days and Controlled goods: ~2–3 weeks.",
         "hey": "hello, I am KEPROBA's assistant. How can I assist you?",
         "hello":"Hey I am M KEPROBA's EXPORT ASSISTANT, how may I help You?"
-        
     }
     for keyword, response in rules.items():
         if keyword in q:
@@ -84,12 +112,12 @@ def get_department_redirect(q: str) -> str | None:
     return None
 
 # ChatGPT API fallback
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")  # Replace with actual key or .env loading if needed
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 async def get_chatgpt_answer(query: str) -> str:
     if not OPENAI_API_KEY:
         return "ChatGPT fallback is not configured properly."
-    
+
     url = "https://api.openai.com/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {OPENAI_API_KEY}",
@@ -132,43 +160,72 @@ async def get_google_fallback(query: str) -> str:
 # Main endpoint
 @app.post("/ask")
 async def ask_question(request: QuestionRequest):
-    q = request.question.lower().strip()
+    q = correct_typos(request.question.strip())
+    q = normalize_text(q)
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Return from cache
     if q in cache:
         return {"answer": cache[q]}
 
-    # Rule-based answer
     rule_answer = get_rule_based_answer(q)
     if rule_answer:
         chat_history.append({"q": q, "a": rule_answer, "time": timestamp})
         cache[q] = rule_answer
         return {"answer": rule_answer}
 
-    # Department redirect
     department_redirect = get_department_redirect(q)
     if department_redirect:
         chat_history.append({"q": q, "a": department_redirect, "time": timestamp})
         cache[q] = department_redirect
         return {"answer": department_redirect}
 
-    # CSV match
     for keyword, answer in csv_data.items():
-        if keyword in q:
+        if get_close_matches(keyword, [q], cutoff=0.7):
             chat_history.append({"q": q, "a": answer, "time": timestamp})
             cache[q] = answer
             return {"answer": answer}
 
-    # ChatGPT fallback
     gpt_response = await get_chatgpt_answer(q)
     if gpt_response:
         chat_history.append({"q": q, "a": gpt_response, "time": timestamp})
         cache[q] = gpt_response
         return {"answer": gpt_response}
 
-    # DuckDuckGo fallback
     online_answer = await get_google_fallback(q)
     chat_history.append({"q": q, "a": online_answer, "time": timestamp})
     cache[q] = online_answer
     return {"answer": online_answer}
+
+# ======================
+# Predictive Analytics APIs
+# ======================
+
+CSV_FORECAST_FILE = "market_forecast_data.csv"
+
+@app.get("/analytics/recommend/{product}")
+def recommend_markets(product: str):
+    try:
+        df = pd.read_csv(CSV_FORECAST_FILE)
+        product_df = df[df["product"].str.lower() == product.lower()]
+        total_exports = product_df.groupby("country")["export_volume_tons"].sum().sort_values(ascending=False)
+        top_markets = total_exports.head(3).index.tolist()
+        return {"product": product, "top_markets": top_markets}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+@app.get("/analytics/forecast/{product}/{country}")
+def forecast_trend(product: str, country: str):
+    try:
+        df = pd.read_csv(CSV_FORECAST_FILE)
+        filtered = df[(df["product"].str.lower() == product.lower()) & (df["country"].str.lower() == country.lower())]
+        if filtered.empty:
+            return {"error": "No data available for the specified product and country."}
+
+        years = [2021, 2022, 2023]
+        trend = {
+            str(year): int(filtered[f"year_{year}"].values[0])
+            for year in years if f"year_{year}" in filtered.columns
+        }
+        return {"product": product, "country": country, "forecast_trend": trend}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
