@@ -1,0 +1,2833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KEPROBA Task Management System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /* Base styles, variables, and animations (as provided, with minor tweaks) */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-green: #006400; /* Dark Green */
+            --primary-red: #B22222; /* Firebrick Red */
+            --primary-black: #1C2526; /* Almost Black */
+            --primary-white: #F5F6F5; /* Off-white */
+            --accent-blue: #4682B4; /* Steel Blue */
+            --high-contrast-text: #1a1a1a;
+            --high-contrast-bg: #ffffff;
+            --light-gray: #e0e0e0;
+            --medium-gray: #a0a0a0;
+            --dark-gray: #333333;
+            --soft-blue: #e0f2f7; /* For notifications/light backgrounds */
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --error-color: #dc3545;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-blue));
+            min-height: 100vh;
+            color: var(--primary-black);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1600px; /* Slightly wider */
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: fadeInDown 0.8s ease-out;
+        }
+        .logo img { max-height: 70px; } /* Slightly larger logo */
+        .user-info { display: flex; align-items: center; gap: 20px; }
+        .user-switcher {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, var(--primary-green), var(--accent-blue));
+            color: var(--primary-white);
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 100, 0, 0.2);
+        }
+        .user-switcher:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 100, 0, 0.3);
+        }
+        .user-avatar {
+            width: 50px; /* Larger avatar */
+            height: 50px;
+            background: linear-gradient(45deg, var(--primary-green), var(--accent-blue));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-white);
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Navigation */
+        .navigation {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 15px 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: fadeInUp 0.8s ease-out;
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .nav-tab {
+            padding: 12px 25px;
+            background: transparent;
+            border: 2px solid var(--light-gray);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: var(--primary-black);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+        }
+        .nav-tab:hover {
+            border-color: var(--primary-green);
+            color: var(--primary-green);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 100, 0, 0.1);
+        }
+        .nav-tab.active {
+            background: linear-gradient(45deg, var(--primary-green), var(--accent-blue));
+            color: var(--primary-white);
+            border-color: transparent;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 100, 0, 0.4);
+        }
+        .nav-tab i.material-icons { font-size: 20px; } /* Icon sizing */
+
+
+        /* Main Content & Cards */
+        .main-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: fadeIn 1s ease-out;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+        .card-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-black);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 2px solid var(--light-gray);
+            padding-bottom: 15px;
+        }
+        .card-title i.material-icons { font-size: 28px; color: var(--primary-green); }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 25px;
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-blue));
+            border-radius: 18px;
+            color: var(--primary-white);
+            animation: scaleIn 0.5s ease-out;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .stat-item:hover { transform: translateY(-3px); }
+        .stat-number {
+            font-size: 38px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        .stat-label { font-size: 15px; opacity: 0.95; }
+
+        /* Task Items */
+        .task-item {
+            padding: 20px;
+            border-left: 6px solid var(--primary-green);
+            background: var(--primary-white);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            animation: fadeInRight 0.5s ease-out;
+        }
+        .task-item:hover {
+            background: #f9f9f9;
+            border-left-color: var(--accent-blue);
+            transform: translateX(5px);
+        }
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .task-title {
+            font-weight: 700;
+            color: var(--primary-black);
+            font-size: 18px;
+            margin-right: 15px;
+            line-height: 1.3;
+        }
+        .task-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .task-status {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: capitalize;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .status-not-started { background: var(--primary-red); color: var(--primary-white); }
+        .status-in-progress { background: var(--warning-color); color: var(--dark-gray); }
+        .status-completed { background: var(--accent-blue); color: var(--primary-white); }
+        .status-done { background: var(--success-color); color: var(--primary-white); }
+        .task-meta {
+            display: flex;
+            gap: 25px;
+            font-size: 14px;
+            color: var(--dark-gray);
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            border-bottom: 1px dashed var(--light-gray);
+            padding-bottom: 10px;
+        }
+        .task-meta span { display: flex; align-items: center; gap: 5px; }
+        .task-meta i.material-icons { font-size: 18px; color: var(--medium-gray); }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-green), var(--accent-blue));
+            color: var(--primary-white);
+            box-shadow: 0 4px 10px rgba(0, 100, 0, 0.2);
+        }
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--primary-black);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .btn-success { background: var(--success-color); color: var(--primary-white); }
+        .btn-warning { background: var(--warning-color); color: var(--dark-gray); }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+        }
+        .btn i.material-icons { font-size: 18px; }
+
+        /* Forms */
+        .form-group { margin-bottom: 25px; }
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: var(--primary-black);
+            font-size: 15px;
+        }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 18px;
+            border: 2px solid var(--light-gray);
+            border-radius: 12px;
+            font-size: 15px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            background-color: var(--primary-white);
+            color: var(--primary-black);
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(0, 100, 0, 0.2);
+        }
+        .form-textarea { resize: vertical; min-height: 100px; }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: var(--light-gray);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--primary-green));
+            transition: width 0.5s ease-in-out;
+            border-radius: 5px;
+        }
+
+        /* Page Management */
+        .page { display: none; opacity: 0; transition: opacity 0.5s ease-in-out; }
+        .page.active { display: block; opacity: 1; }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 18px 25px;
+            background: var(--success-color);
+            color: var(--primary-white);
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .notification.show { transform: translateX(0); }
+        .notification.error { background: var(--error-color); }
+        .notification.warning { background: var(--warning-color); color: var(--dark-gray); }
+        .notification.info { background: var(--info-color); }
+        .notification i.material-icons { font-size: 24px; }
+
+        /* Comments */
+        .task-comments {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--light-gray);
+        }
+        .comment {
+            background: var(--soft-blue); /* Lighter background for comments */
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .comment-author {
+            font-weight: 700;
+            color: var(--primary-green);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .comment-author .timestamp {
+            font-weight: 400;
+            font-size: 12px;
+            color: var(--medium-gray);
+        }
+        .add-comment { display: flex; gap: 10px; margin-top: 15px; }
+        .comment-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .comment-input:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(70, 130, 180, 0.1); }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .modal-content {
+            background: var(--primary-white);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 95%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+            animation: zoomIn 0.3s ease-out;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--light-gray);
+            padding-bottom: 15px;
+        }
+        .modal-header h2 { font-size: 24px; color: var(--primary-black); }
+        .modal-close {
+            cursor: pointer;
+            font-size: 30px;
+            color: var(--medium-gray);
+            transition: color 0.2s ease;
+        }
+        .modal-close:hover { color: var(--primary-red); }
+
+        /* Hierarchy View */
+        .hierarchy-view {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: fadeIn 1s ease-out;
+        }
+        .hierarchy-level { margin-left: 0; margin-bottom: 20px; }
+        .hierarchy-level.level-1 { margin-left: 30px; }
+        .hierarchy-level.level-2 { margin-left: 60px; }
+        .hierarchy-level.level-3 { margin-left: 90px; }
+        .hierarchy-level.level-4 { margin-left: 120px; }
+        .hierarchy-level.level-5 { margin-left: 150px; }
+        .hierarchy-item {
+            background: var(--primary-white);
+            padding: 18px 25px;
+            border-radius: 15px;
+            border-left: 6px solid var(--accent-blue);
+            margin-bottom: 15px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .hierarchy-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        }
+        .hierarchy-item::before {
+            content: "";
+            position: absolute;
+            left: -35px; /* Adjust based on margin-left */
+            top: 50%;
+            width: 30px;
+            height: 2px;
+            background: var(--medium-gray);
+            transform: translateY(-50%);
+        }
+        .hierarchy-item:first-child::before { display: none; }
+        .role-indicator {
+            display: inline-block;
+            padding: 5px 12px;
+            background: var(--primary-green);
+            color: var(--primary-white);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .hierarchy-user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-white);
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* Tooltips */
+        [data-tooltip] { position: relative; }
+        [data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 10px); /* Position above */
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-black);
+            color: var(--primary-white);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            white-space: nowrap;
+            z-index: 10;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        [data-tooltip]:hover::before { /* Arrow for tooltip */
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: var(--primary-black) transparent transparent transparent;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 10;
+        }
+        [data-tooltip]:hover::after,
+        [data-tooltip]:hover::before {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* High Contrast Mode */
+        [high-contrast] {
+            --primary-green: #000000;
+            --primary-red: #ff0000;
+            --primary-black: #ffffff;
+            --primary-white: #000000;
+            --accent-blue: #0000ff;
+            --light-gray: #333333;
+            --medium-gray: #aaaaaa;
+            --dark-gray: #cccccc;
+            --soft-blue: #222222;
+            --success-color: #00ff00;
+            --warning-color: #ffff00;
+            --info-color: #00ffff;
+            --error-color: #ff0000;
+            background: var(--primary-black) !important;
+            color: var(--primary-black);
+        }
+        [high-contrast] body { background: var(--primary-black) !important; color: var(--primary-black); }
+        [high-contrast] .header,
+        [high-contrast] .navigation,
+        [high-contrast] .dashboard-card,
+        [high-contrast] .task-item,
+        [high-contrast] .modal-content,
+        [high-contrast] .hierarchy-view,
+        [high-contrast] .hierarchy-item,
+        [high-contrast] .comment {
+            background: var(--primary-black) !important;
+            color: var(--primary-black) !important;
+            border: 2px solid var(--primary-black) !important;
+            box-shadow: none !important;
+        }
+        [high-contrast] .nav-tab {
+            border-color: var(--primary-black) !important;
+            color: var(--primary-black) !important;
+        }
+        [high-contrast] .nav-tab.active {
+            background: var(--primary-black) !important;
+            color: var(--primary-white) !important;
+            border-color: var(--primary-white) !important;
+        }
+        [high-contrast] .btn {
+            background: var(--primary-black) !important;
+            color: var(--primary-black) !important;
+            border: 2px solid var(--primary-black) !important;
+        }
+        [high-contrast] .btn-primary, [high-contrast] .btn-success { background: var(--primary-black) !important; border-color: var(--primary-black) !important; }
+        [high-contrast] .btn-secondary, [high-contrast] .btn-warning { background: var(--primary-black) !important; border-color: var(--primary-black) !important; }
+        [high-contrast] .form-input, [high-contrast] .form-select, [high-contrast] .form-textarea {
+            background: var(--primary-black) !important;
+            color: var(--primary-black) !important;
+            border-color: var(--primary-black) !important;
+        }
+        [high-contrast] .stat-item {
+            background: var(--primary-black) !important;
+            border: 2px solid var(--primary-black) !important;
+            color: var(--primary-black) !important;
+        }
+        [high-contrast] .task-item { border-left-color: var(--primary-black) !important; }
+        [high-contrast] .hierarchy-item { border-left-color: var(--primary-black) !important; }
+
+        /* File Upload & Preview */
+        .file-preview {
+            max-width: 250px;
+            max-height: 250px;
+            margin-top: 15px;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .file-list { margin-top: 15px; border-top: 1px dashed var(--light-gray); padding-top: 15px; }
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--dark-gray);
+        }
+        .file-item a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .file-item a:hover { text-decoration: underline; color: var(--primary-green); }
+        .file-item i.material-icons { font-size: 18px; color: var(--medium-gray); }
+
+        /* Charts */
+        .chart-container {
+            position: relative;
+            height: 350px; /* Increased height for better visibility */
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--primary-white);
+            border-radius: 20px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Filter Group */
+        .filter-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            padding: 15px;
+            background: var(--soft-blue);
+            border-radius: 15px;
+            box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.05);
+        }
+        .filter-group .form-input, .filter-group .form-select {
+            flex: 1;
+            min-width: 150px;
+            border-radius: 8px;
+        }
+
+        /* Task Assignment (for multiple assignees) */
+        .assign-multiple-container {
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            padding: 15px;
+            background: var(--soft-blue);
+            margin-top: 10px;
+        }
+        .selected-assignees-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .assignee-tag {
+            background: var(--accent-blue);
+            color: var(--primary-white);
+            padding: 6px 10px;
+            border-radius: 15px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .assignee-tag .remove-tag {
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 1;
+            margin-left: 5px;
+            color: rgba(255, 255, 255, 0.8);
+            transition: color 0.2s ease;
+        }
+        .assignee-tag .remove-tag:hover { color: var(--primary-white); }
+        .full-width { grid-column: 1 / -1; }
+
+        /* Workflow Trail */
+        .workflow-trail {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--primary-white);
+            border-radius: 20px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .workflow-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--light-gray);
+            position: relative;
+        }
+        .workflow-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .workflow-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--primary-green);
+            color: var(--primary-white);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            margin-right: 15px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .workflow-content strong { color: var(--primary-green); }
+        .workflow-content span { font-size: 13px; color: var(--medium-gray); margin-left: 10px; }
+
+        /* Workplan Upload/Manual Entry */
+        .workplan-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--light-gray);
+        }
+        .workplan-option {
+            border: 2px dashed var(--light-gray);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: var(--soft-blue);
+        }
+        .workplan-option:hover {
+            border-color: var(--primary-green);
+            background-color: #eaf8fc;
+            box-shadow: 0 4px 15px rgba(0, 100, 0, 0.1);
+        }
+        .workplan-option.selected {
+            border-color: var(--primary-green);
+            background-color: #dcf2f7;
+            box-shadow: 0 4px 20px rgba(0, 100, 0, 0.2);
+        }
+        .workplan-option i.material-icons { font-size: 48px; color: var(--accent-blue); margin-bottom: 10px; }
+        .workplan-option h3 { color: var(--primary-green); margin-bottom: 5px; }
+        #workplan-manual-entry { margin-top: 20px; display: none; }
+        .manual-task-item {
+            background: var(--primary-white);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--light-gray);
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .manual-task-item .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary-red);
+            color: var(--primary-white);
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .manual-task-item .remove-btn:hover { background: #cc0000; }
+
+        /* Media Queries */
+        @media (max-width: 1024px) {
+            .main-content { grid-template-columns: 1fr; }
+            .hierarchy-level.level-1 { margin-left: 20px; }
+            .hierarchy-level.level-2 { margin-left: 40px; }
+            .hierarchy-level.level-3 { margin-left: 60px; }
+            .hierarchy-level.level-4 { margin-left: 80px; }
+            .hierarchy-level.level-5 { margin-left: 100px; }
+            .hierarchy-item::before { left: -20px; width: 15px; }
+        }
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .header { flex-direction: column; gap: 15px; text-align: center; }
+            .nav-tabs { justify-content: flex-start; }
+            .main-content { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .task-actions { flex-direction: column; gap: 8px; }
+            .form-group { margin-bottom: 18px; }
+            .filter-group { flex-direction: column; }
+            .modal-content { padding: 20px; }
+        }
+        @media (max-width: 480px) {
+            .container { padding: 10px; }
+            .form-input, .form-select, .form-textarea { font-size: 16px; padding: 10px 15px; }
+            .btn { padding: 10px 18px; font-size: 13px; }
+            .task-meta { flex-direction: column; gap: 5px; font-size: 13px; }
+            .card-title { font-size: 20px; }
+            .stat-number { font-size: 30px; }
+            .stat-label { font-size: 13px; }
+            .user-avatar { width: 40px; height: 40px; font-size: 16px; }
+            .user-switcher { padding: 8px 15px; font-size: 13px; }
+            .nav-tab { padding: 10px 18px; font-size: 13px; }
+        }
+
+        /* Keyframe Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInRight {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo"><img src="assets/image/logo.svg" alt="KEPROBA Logo" aria-label="KEPROBA Logo"></div>
+            <div class="user-info">
+                <button class="user-switcher" onclick="switchUser()" data-tooltip="Switch to another user"><i class="material-icons">person_swap</i> Switch User</button>
+                <div>
+                    <div style="font-weight: 600;" id="current-user-name"></div>
+                    <div style="font-size: 14px; color: var(--primary-black);" id="current-user-role"></div>
+                </div>
+                <div class="user-avatar" id="current-user-avatar"></div>
+            </div>
+        </header>
+
+        <nav class="navigation">
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showPage('dashboard')" role="tab" aria-selected="true" aria-controls="dashboard" data-tooltip="View your task overview"><i class="material-icons">dashboard</i> Dashboard</button>
+                <button class="nav-tab" onclick="showPage('tasks')" role="tab" aria-selected="false" aria-controls="tasks" data-tooltip="View tasks you created"><i class="material-icons">check_circle</i> My Tasks</button>
+                <button class="nav-tab" onclick="showPage('create')" role="tab" aria-selected="false" aria-controls="create" data-tooltip="Create a new task"><i class="material-icons">add_task</i> Create Task</button>
+                <button class="nav-tab" onclick="showPage('assigned')" role="tab" aria-selected="false" aria-controls="assigned" data-tooltip="View tasks assigned to you"><i class="material-icons">assignment_ind</i> Assigned to Me</button>
+                <button class="nav-tab" onclick="showPage('hierarchy')" role="tab" aria-selected="false" aria-controls="hierarchy" data-tooltip="View organizational hierarchy"><i class="material-icons">apartment</i> Organization</button>
+                <button class="nav-tab" onclick="showPage('performance')" role="tab" aria-selected="false" aria-controls="performance" data-tooltip="View performance metrics"><i class="material-icons">analytics</i> Performance</button>
+                <button class="nav-tab" onclick="showPage('help')" role="tab" aria-selected="false" aria-controls="help" data-tooltip="View tutorials and FAQs"><i class="material-icons">help</i> Help</button>
+                <button class="btn btn-secondary" onclick="toggleHighContrast()" data-tooltip="Toggle high contrast mode"><i class="material-icons">contrast</i> Toggle High Contrast</button>
+            </div>
+        </nav>
+
+        <div id="login" class="page active">
+            <div class="dashboard-card full-width">
+                <h2 class="card-title"><i class="material-icons">lock</i> Secure Login</h2>
+                <form id="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="login-user">Select Your User Profile:</label>
+                        <select class="form-select" id="login-user" required aria-required="true"></select>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="material-icons">login</i> Login to KEPROBA System</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="dashboard" class="page">
+            <div class="main-content">
+                <div class="dashboard-card">
+                    <h2 class="card-title"><i class="material-icons">track_changes</i> My Task Overview</h2>
+                    <div class="filter-group">
+                        <select class="form-select" id="dashboard-filter" onchange="updateDashboard()" aria-label="Filter dashboard by status">
+                            <option value="all">All Statuses</option>
+                            <option value="not-started">Not Started</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                            <option value="done">Done</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                    </div>
+                    <div class="stats-grid" id="dashboard-stats"></div>
+                </div>
+                <div class="dashboard-card">
+                    <h2 class="card-title"><i class="material-icons">history</i> Recent Activities & Workflow Trail</h2>
+                    <div id="recent-activities"></div>
+                    <div class="workflow-trail" id="workflow-trail-display">
+                        <h3><i class="material-icons">stream</i> Workflow History</h3>
+                        <div id="workflow-events"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tasks" class="page">
+            <div class="dashboard-card full-width">
+                <h2 class="card-title"><i class="material-icons">check_circle_outline</i> My Created & Delegated Tasks</h2>
+                <div class="filter-group">
+                    <input type="text" class="form-input" id="task-search" placeholder="Search tasks by title or description..." oninput="updateTasksView()" aria-label="Search my tasks">
+                    <select class="form-select" id="tasks-filter" onchange="updateTasksView()" aria-label="Filter my tasks by status">
+                        <option value="all">All Statuses</option>
+                        <option value="not-started">Not Started</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="done">Done</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                    <select class="form-select" id="department-filter" onchange="updateTasksView()" aria-label="Filter my tasks by department"></select>
+                    <select class="form-select" id="priority-filter" onchange="updateTasksView()" aria-label="Filter my tasks by priority"></select>
+                    <select class="form-select" id="sort-by" onchange="updateTasksView()" aria-label="Sort my tasks by"></select>
+                </div>
+                <div id="my-tasks-list"></div>
+            </div>
+        </div>
+
+        <div id="assigned" class="page">
+            <div class="dashboard-card full-width">
+                <h2 class="card-title"><i class="material-icons">assignment_turned_in</i> Tasks Assigned to Me</h2>
+                <div class="filter-group">
+                    <input type="text" class="form-input" id="assigned-task-search" placeholder="Search assigned tasks..." oninput="updateAssignedTasksView()" aria-label="Search assigned tasks">
+                    <select class="form-select" id="assigned-filter" onchange="updateAssignedTasksView()" aria-label="Filter assigned tasks by status">
+                        <option value="all">All Statuses</option>
+                        <option value="not-started">Not Started</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="done">Done</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                    <select class="form-select" id="assigned-department-filter" onchange="updateAssignedTasksView()" aria-label="Filter assigned tasks by department"></select>
+                    <select class="form-select" id="assigned-priority-filter" onchange="updateAssignedTasksView()" aria-label="Filter assigned tasks by priority"></select>
+                </div>
+                <div id="assigned-tasks-notice"></div>
+                <div id="assigned-tasks-list"></div>
+            </div>
+        </div>
+
+        <div id="create" class="page">
+            <div class="dashboard-card full-width">
+                <h2 class="card-title"><i class="material-icons">add_circle</i> Create New Task or Workplan Item</h2>
+                <div class="workplan-section">
+                    <label class="form-label">How would you like to create tasks?</label>
+                    <div style="display: flex; gap: 20px;">
+                        <div class="workplan-option" id="option-upload" onclick="selectWorkplanOption('upload')">
+                            <i class="material-icons">cloud_upload</i>
+                            <h3>Upload Workplan Document</h3>
+                            <p>Upload your official KEPROBA workplan document (e.g., PDF, Excel).</p>
+                        </div>
+                        <div class="workplan-option" id="option-manual" onclick="selectWorkplanOption('manual')">
+                            <i class="material-icons">edit_note</i>
+                            <h3>Manually Enter Tasks</h3>
+                            <p>Enter task details one by one with automatic assignee suggestions.</p>
+                        </div>
+                    </div>
+                    <div id="workplan-upload-section" style="display: none; margin-top: 20px;">
+                        <div class="form-group">
+                            <label class="form-label" for="workplan-file">Upload Workplan File:</label>
+                            <input type="file" class="form-input" id="workplan-file" accept=".pdf,.docx,.xlsx" onchange="handleWorkplanUpload()">
+                            <small class="form-text">Supported formats: PDF, DOCX, XLSX. System will attempt to parse tasks.</small>
+                        </div>
+                        <div id="parsed-tasks-preview" style="margin-top: 20px; border-top: 1px dashed var(--light-gray); padding-top: 15px; display: none;">
+                            <h3 class="card-title">Parsed Tasks from Workplan:</h3>
+                            <div id="parsed-tasks-list"></div>
+                            <button type="button" class="btn btn-success" onclick="confirmParsedTasks()" style="margin-top: 20px;"><i class="material-icons">check</i> Confirm & Add All Parsed Tasks</button>
+                        </div>
+                    </div>
+
+                    <form id="task-form" onsubmit="createTask(event)" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label" for="task-title">Task Title*</label>
+                            <input type="text" class="form-input" id="task-title" placeholder="Enter task title..." required aria-required="true">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="task-description">Description</label>
+                            <textarea class="form-textarea" rows="4" id="task-description" placeholder="Describe the task in detail..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="task-assignees">Assign To* (Select multiple if needed)</label>
+                            <select class="form-select" id="task-assignees" multiple required aria-required="true" onchange="updateAssigneeTags(this.id, 'create-assignee-tags')"></select>
+                            <div class="selected-assignees-tags" id="create-assignee-tags"></div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="form-group">
+                                <label class="form-label" for="task-priority">Priority</label>
+                                <select class="form-select" id="task-priority" aria-label="Task priority"></select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="task-due-date">Due Date</label>
+                                <input type="date" class="form-input" id="task-due-date" aria-label="Task due date">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="task-department">Department</label>
+                            <select class="form-select" id="task-department" aria-label="Task department"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="task-dependencies">Dependencies (Tasks that must be completed first)</label>
+                            <select class="form-select" id="task-dependencies" multiple aria-label="Task dependencies"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="task-files">Attach Files</label>
+                            <input type="file" class="form-input" id="task-files" multiple accept=".pdf,.txt,.jpg,.png,.docx,.xlsx" aria-label="Attach files">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" id="task-milestone"> Mark as Milestone
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="margin-top: 20px; padding: 12px 24px;"><i class="material-icons">send</i> Create Task</button>
+                    </form>
+
+                    <div id="workplan-manual-entry" style="display: none;">
+                        <h3 class="card-title"><i class="material-icons">playlist_add</i> Manually Add Workplan Tasks</h3>
+                        <div id="manual-task-form-container">
+                            </div>
+                        <button type="button" class="btn btn-secondary" onclick="addManualTaskField()"><i class="material-icons">add</i> Add Another Task</button>
+                        <button type="button" class="btn btn-success" onclick="saveManualWorkplan()" style="margin-top: 20px;"><i class="material-icons">save</i> Save All Manual Tasks</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="hierarchy" class="page">
+            <div class="hierarchy-view">
+                <h2 class="card-title"><i class="material-icons">account_tree</i> Organizational Hierarchy & Task Distribution</h2>
+                <div id="hierarchy-content"></div>
+            </div>
+        </div>
+
+        <div id="performance" class="page">
+            <div class="dashboard-card full-width">
+                <h2 class="card-title"><i class="material-icons">trending_up</i> Performance Overview & Analytics</h2>
+                <div class="filter-group">
+                    <select class="form-select" id="performance-user-filter" onchange="updatePerformanceView()" aria-label="Filter performance by user">
+                        <option value="all">All Users</option>
+                        </select>
+                    <select class="form-select" id="performance-time-filter" onchange="updatePerformanceView()" aria-label="Filter performance by time">
+                        <option value="all">All Time</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="quarter">This Quarter</option>
+                        <option value="year">This Year</option>
+                    </select>
+                    <select class="form-select" id="performance-department-filter" onchange="updatePerformanceView()" aria-label="Filter performance by department"></select>
+                </div>
+                <div id="performance-stats" class="stats-grid"></div>
+                <div class="chart-container"><canvas id="task-trends-chart"></canvas></div>
+                <div class="chart-container"><canvas id="completion-rate-chart"></canvas></div>
+                <div class="chart-container"><canvas id="priority-distribution-chart"></canvas></div>
+                <div class="chart-container"><canvas id="overdue-tasks-chart"></canvas></div>
+            </div>
+        </div>
+
+        <div id="help" class="page">
+            <div class="dashboard-card full-width">
+                <h2 class="card-title"><i class="material-icons">help_outline</i> Help & Tutorials</h2>
+                <div>
+                    <h3>Getting Started</h3>
+                    <p>Welcome to the KEPROBA Task Management System! This platform helps you manage your tasks efficiently, collaborate with colleagues, and track progress. Navigate using the tabs above or try voice commands.</p>
+
+                    <h3>Voice Commands</h3>
+                    <p>Enhance your productivity with voice commands. Simply click the microphone icon at the bottom right and say:</p>
+                    <ul>
+                        <li><strong>"Show [Dashboard/My Tasks/Create Task/Assigned to Me/Organization/Performance/Help]"</strong> to switch pages.</li>
+                        <li><strong>"Create task [task title]"</strong> to quickly open the create task form with a pre-filled title.</li>
+                        <li><strong>"Update task [ID] to [status]"</strong> (e.g., "Update task 123 to in progress").</li>
+                        <li><strong>"What are my overdue tasks?"</strong> to get a quick summary.</li>
+                        <li><strong>"Help"</strong> to get a list of available voice commands.</li>
+                    </ul>
+
+                    <h3>File Upload & Attachments</h3>
+                    <p>You can attach relevant documents (PDFs, images, text files, Word, Excel) to your tasks. Use the 'Attach Files' option when creating or editing a task. These files will be accessible to all assigned users.</p>
+
+                    <h3>Workplan Integration</h3>
+                    <p>Streamline task creation by uploading your official KEPROBA Workplan document. The system will intelligently parse tasks, assignees, and due dates, or you can manually enter tasks following a structured format with auto-suggestions for assignees.</p>
+
+                    <h3>Office 365 Integration (Conceptual)</h3>
+                    <p>This system is designed to seamlessly integrate with your Office 365 environment. Once deployed, it can appear as a side-panel within your Outlook Web App, allowing you to manage tasks directly from your email. Task delegation notifications will also be sent to your official company email (<em>@brand.ke</em>).</p>
+
+                    <h3>Performance Tracking</h3>
+                    <p>Keep track of individual and departmental performance with real-time analytics and professional graphs. Managers and higher-level personnel have access to comprehensive performance dashboards to monitor progress and workload distribution.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="edit-task-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="material-icons">edit</i> Edit Task Details</h2>
+                    <span class="modal-close" onclick="closeEditModal()" data-tooltip="Close">&times;</span>
+                </div>
+                <form id="edit-task-form" onsubmit="saveTaskEdit(event)">
+                    <input type="hidden" id="edit-task-id">
+                    <div class="form-group">
+                        <label class="form-label" for="edit-task-title">Task Title*</label>
+                        <input type="text" class="form-input" id="edit-task-title" required aria-required="true">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-task-description">Description</label>
+                        <textarea class="form-textarea" rows="4" id="edit-task-description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-task-assignees">Assign To* (Select multiple if needed)</label>
+                        <select class="form-select" id="edit-task-assignees" multiple required aria-required="true" onchange="updateAssigneeTags(this.id, 'edit-assignee-tags')"></select>
+                        <div class="selected-assignees-tags" id="edit-assignee-tags"></div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label class="form-label" for="edit-task-priority">Priority</label>
+                            <select class="form-select" id="edit-task-priority"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="edit-task-due-date">Due Date</label>
+                            <input type="date" class="form-input" id="edit-task-due-date">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-task-department">Department</label>
+                        <select class="form-select" id="edit-task-department"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-task-dependencies">Dependencies</label>
+                        <select class="form-select" id="edit-task-dependencies" multiple></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-task-files">Attach New Files</label>
+                        <input type="file" class="form-input" id="edit-task-files" multiple accept=".pdf,.txt,.jpg,.png,.docx,.xlsx">
+                    </div>
+                    <div id="edit-task-files-preview" class="file-list"></div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="edit-task-milestone"> Mark as Milestone
+                        </label>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="btn btn-primary"><i class="material-icons">save</i> Save Changes</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeEditModal()"><i class="material-icons">cancel</i> Cancel</button>
+                    </div>
+                </form>
+                <div class="task-comments" id="edit-task-comments-section">
+                    <h4><i class="material-icons">comment</i> Comments</h4>
+                    <div id="edit-task-comments-list"></div>
+                    <div class="add-comment">
+                        <input type="text" class="comment-input" id="new-comment-input" placeholder="Add a new comment...">
+                        <button class="btn btn-primary" onclick="addComment(document.getElementById('edit-task-id').value)"><i class="material-icons">add_comment</i> Add Comment</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="notification" class="notification"></div>
+
+        <div id="voice-input" style="position: fixed; bottom: 20px; right: 20px; z-index: 999;">
+            <button class="btn btn-primary" onclick="startVoiceInput()" data-tooltip="Start Voice Input"><i class="material-icons">mic</i> Voice Input</button>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let tasks = [];
+        let taskTrendsChart = null;
+        let completionRateChart = null;
+        let priorityDistributionChart = null;
+        let overdueTasksChart = null;
+        let workplanOptionSelected = null; // 'upload' or 'manual'
+
+        // Updated user data with email format and manager hierarchy
+        let users = {
+            floice_mukabana: { id: 'floice_mukabana', name: 'Floice Mukabana', email: 'marcosngeso20@gmail.com', role: 'Chief Executive Officer', avatar: 'FM', level: 0, department: 'Executive', canAssignTo: ['celestine_rono', 'victor_otieno', 'rebecca_mpaayei', 'reuben_wanjala', 'maureen_mambo', 'austin_macheso', 'peter_ouma', 'mary_wanjiku'] },
+            celestine_rono: { id: 'celestine_rono', name: 'Celestine Rono', email: 'marcosngeso20@gmail.com', role: 'Strategy Director', avatar: 'CR', level: 1, department: 'Strategy, Planning & Quality Assurance', manager: 'floice_mukabana', canAssignTo: ['rebecca_mpaayei', 'austin_macheso', 'peter_ouma', 'mary_wanjiku'] },
+            victor_otieno: { id: 'victor_otieno', name: 'Victor Otieno', email: 'victor.otieno@keproba.ke', role: 'Audit Director', avatar: 'VO', level: 1, department: 'Audit', manager: 'floice_mukabana', canAssignTo: ['mary_wanjiku'] },
+            rebecca_mpaayei: { id: 'rebecca_mpaayei', name: 'Rebecca Mpaayei', email: 'rebecca.mpaayei@keproba.ke', role: 'PMDD Manager', avatar: 'RM', level: 2, department: 'Product & Market Development', manager: 'celestine_rono', canAssignTo: ['austin_macheso', 'peter_ouma', 'mary_wanjiku'] },
+            reuben_wanjala: { id: 'reuben_wanjala', name: 'Reuben Wanjala', email: 'reuben.wanjala@keproba.ke', role: 'Director Resource Center', avatar: 'RW', level: 1, department: 'Resource Center', manager: 'floice_mukabana', canAssignTo: ['wycliffe_rono'] },
+            wycliffe_rono: { id: 'wycliffe_rono', name: 'Wycliffe Rono', email: 'wycliffe.rono@keproba.ke', role: 'ICT Manager', avatar: 'WR', level: 2, department: 'ICT', manager: 'reuben_wanjala', canAssignTo: ['peter_ouma', 'mary_wanjiku'] },
+            maureen_mambo: { id: 'maureen_mambo', name: 'Maureen Mambo', email: 'maureen.mambo@keproba.ke', role: 'Director Nation Brand Development', avatar: 'MM', level: 1, department: 'Nation Brand Development', manager: 'floice_mukabana', canAssignTo: ['mary_wanjiku'] },
+            austin_macheso: { id: 'austin_macheso', name: 'Austin Macheso', email: 'austin.macheso@keproba.ke', role: 'Product Development Expert', avatar: 'AM', level: 3, department: 'Product & Market Development', manager: 'rebecca_mpaayei', canAssignTo: ['peter_ouma', 'mary_wanjiku'] },
+            peter_ouma: { id: 'peter_ouma', name: 'Peter Ouma', email: 'peter.ouma@keproba.ke', role: 'Senior Analyst', avatar: 'PO', level: 4, department: 'Product & Market Development', manager: 'austin_macheso', canAssignTo: ['mary_wanjiku'] },
+            mary_wanjiku: { id: 'mary_wanjiku', name: 'Mary Wanjiku', email: 'mary.wanjiku@keproba.ke', role: 'Analyst', avatar: 'MW', level: 5, department: 'Product & Market Development', manager: 'peter_ouma', canAssignTo: [] }
+        };
+
+        // Initial Sample Tasks (more realistic and with multiple assignees/files)
+        function initializeTasks() {
+            tasks = [
+                { id: 1, title: 'Q4 Export Strategy Development', description: 'Develop comprehensive export strategy for Q4, focusing on East African markets.', creator: 'floice_mukabana', assignees: ['celestine_rono', 'rebecca_mpaayei'], status: 'in-progress', priority: 'High', dueDate: '2025-12-15', department: 'Strategy, Planning & Quality Assurance', createdAt: new Date('2025-07-01'), comments: [{ author: 'floice_mukabana', text: 'Please ensure market research is thorough.', timestamp: new Date('2025-07-05') }], dependencies: [], isMilestone: true, files: [{ name: 'Market_Report_Template.docx', url: 'assets/docs/Market_Report_Template.docx' }] },
+                { id: 2, title: 'Annual Financial Audit Preparation', description: 'Gather all financial records and statements for the annual audit.', creator: 'floice_mukabana', assignees: ['victor_otieno', 'mary_wanjiku'], status: 'completed', priority: 'Critical', dueDate: '2025-07-28', department: 'Audit', createdAt: new Date('2025-07-15'), comments: [{ author: 'victor_otieno', text: 'All documents submitted to external auditors.', timestamp: new Date('2025-07-27') }], dependencies: [], isMilestone: false, files: [{ name: 'Financial_Statements_2024.pdf', url: 'assets/docs/Financial_Statements_2024.pdf' }] },
+                { id: 3, title: 'Made in Kenya Product Market Analysis', description: 'Conduct a detailed market analysis for potential new "Made in Kenya" product categories.', creator: 'celestine_rono', assignees: ['rebecca_mpaayei', 'austin_macheso'], status: 'not-started', priority: 'Medium', dueDate: '2025-09-10', department: 'Product & Market Development', createdAt: new Date('2025-07-20'), comments: [], dependencies: [1], isMilestone: false, files: [] },
+                { id: 4, title: 'ICT System Infrastructure Upgrade', description: 'Plan and execute the upgrade of the main IT infrastructure, including servers and network equipment.', creator: 'reuben_wanjala', assignees: ['wycliffe_rono', 'peter_ouma'], status: 'in-progress', priority: 'High', dueDate: '2025-08-05', department: 'ICT', createdAt: new Date('2025-07-18'), comments: [{ author: 'wycliffe_rono', text: 'Phase 1 network assessment complete.', timestamp: new Date('2025-07-25') }], dependencies: [], isMilestone: true, files: [{ name: 'Upgrade_Plan_v1.pdf', url: 'assets/docs/Upgrade_Plan_v1.pdf' }] },
+                { id: 5, title: 'Nation Brand Perception Survey', description: 'Design and deploy a survey to gauge public perception of the national brand.', creator: 'maureen_mambo', assignees: ['mary_wanjiku'], status: 'not-started', priority: 'Medium', dueDate: '2025-10-01', department: 'Nation Brand Development', createdAt: new Date('2025-07-22'), comments: [], dependencies: [], isMilestone: false, files: [] },
+                { id: 6, title: 'Website Content Refresh', description: 'Update all outdated content on the KEPROBA official website.', creator: 'wycliffe_rono', assignees: ['peter_ouma'], status: 'in-progress', priority: 'Low', dueDate: '2025-08-30', department: 'ICT', createdAt: new Date('2025-07-25'), comments: [], dependencies: [4], isMilestone: false, files: [] },
+                { id: 7, title: 'New Product Concept Brainstorm', description: 'Hold a brainstorming session for innovative product concepts for export.', creator: 'rebecca_mpaayei', assignees: ['austin_macheso'], status: 'not-started', priority: 'High', dueDate: '2025-08-20', department: 'Product & Market Development', createdAt: new Date('2025-07-28'), comments: [], dependencies: [3], isMilestone: false, files: [] },
+                { id: 8, title: 'Monthly Performance Report Compilation', description: 'Compile the July monthly performance report for the executive board.', creator: 'peter_ouma', assignees: ['mary_wanjiku'], status: 'done', priority: 'High', dueDate: '2025-07-31', department: 'Product & Market Development', createdAt: new Date('2025-07-29'), comments: [{ author: 'mary_wanjiku', text: 'Report drafted and sent for review.', timestamp: new Date('2025-07-30') }], dependencies: [], isMilestone: false, files: [{ name: 'July_Performance_Report.pdf', url: 'assets/docs/July_Performance_Report.pdf' }] },
+                { id: 9, title: 'IT Security Policy Review', description: 'Review and update the internal IT security policy document.', creator: 'wycliffe_rono', assignees: ['wycliffe_rono', 'peter_ouma'], status: 'in-progress', priority: 'Medium', dueDate: '2025-09-15', department: 'ICT', createdAt: new Date('2025-07-26'), comments: [], dependencies: [], isMilestone: false, files: [] },
+                { id: 10, title: 'Brand Guideline Development', description: 'Develop comprehensive brand guidelines for KEPROBA.', creator: 'maureen_mambo', assignees: ['mary_wanjiku'], status: 'not-started', priority: 'High', dueDate: '2025-11-01', department: 'Nation Brand Development', createdAt: new Date('2025-07-29'), comments: [], dependencies: [5], isMilestone: true, files: [] }
+            ];
+        }
+
+        // Persistent Storage
+        function saveTasks() { localStorage.setItem('keproba_tasks', JSON.stringify(tasks)); }
+        function loadTasks() {
+            const saved = localStorage.getItem('keproba_tasks');
+            if (saved) {
+                tasks = JSON.parse(saved).map(t => ({
+                    ...t,
+                    createdAt: new Date(t.createdAt),
+                    comments: t.comments ? t.comments.map(c => ({ ...c, timestamp: new Date(c.timestamp) })) : [],
+                    dependencies: t.dependencies || [],
+                    isMilestone: t.isMilestone || false,
+                    files: t.files || [],
+                    assignees: t.assignees || [t.assignee].filter(Boolean) // Handle old single assignee format
+                }));
+            } else {
+                initializeTasks();
+            }
+        }
+
+        // Email Notification Simulation (Conceptual for @brand.ke)
+        function sendEmailNotification(recipientEmail, subject, body) {
+            console.log(`Simulating Email to: ${recipientEmail}`);
+            console.log(`Subject: ${subject}`);
+            console.log(`Body: ${body}`);
+            // In a real application, this would integrate with an email API (e.g., Microsoft Graph API for Office 365)
+            // For now, we'll just show a notification to the user.
+            showNotification(`Email notification sent to ${recipientEmail} for '${subject}'`, 'info');
+        }
+
+        // Task Delegation Notification Logic (Email)
+        function notifyDelegatedTask(task) {
+            task.assignees.forEach(assigneeId => {
+                const assignee = users[assigneeId];
+                if (assignee && assignee.email) {
+                    const subject = `New Task Delegated: ${task.title}`;
+                    const body = `Dear ${assignee.name},\n\nYou have been delegated a new task: "${task.title}".\nDescription: ${task.description}\nDue Date: ${task.dueDate}\nPriority: ${task.priority}\n\nPlease log in to the KEPROBA Task Management System to view full details and start working on it.\n\nBest regards,\nKEPROBA Task Management System`;
+                    sendEmailNotification(assignee.email, subject, body);
+                }
+            });
+        }
+
+        // Reminder Checks
+        function checkReminders() {
+            if (!currentUser) return;
+            tasks.forEach(task => {
+                const dueDate = new Date(task.dueDate);
+                const now = new Date();
+                const oneDayBefore = new Date(dueDate.getTime() - 24 * 60 * 60 * 1000);
+
+                if (task.assignees.includes(currentUser) && task.status !== 'done' && task.status !== 'completed') {
+                    // Overdue
+                    if (now > dueDate && task.status !== 'overdue') {
+                        showNotification(`Urgent: Task '${task.title}' is overdue!`, 'error');
+                        speak(`Urgent: Task ${task.title} is overdue.`);
+                        // Optionally update task status to overdue for better tracking if not done
+                        // task.status = 'overdue'; // This might require a saveTasks() call
+                    }
+                    // Due tomorrow
+                    else if (now >= oneDayBefore && now < dueDate) {
+                        showNotification(`Reminder: Task '${task.title}' is due tomorrow!`, 'warning');
+                        speak(`Reminder: ${task.title} is due tomorrow.`);
+                    }
+                }
+            });
+        }
+
+        // Update UI based on current user
+        function updateUserInterface() {
+            if (!currentUser) {
+                document.getElementById('current-user-name').textContent = 'Guest';
+                document.getElementById('current-user-role').textContent = 'Please Login';
+                document.getElementById('current-user-avatar').textContent = 'GU';
+                document.getElementById('voice-input').style.display = 'none';
+                return;
+            }
+            const user = users[currentUser];
+            document.getElementById('current-user-name').textContent = user.name;
+            document.getElementById('current-user-role').textContent = user.role;
+            document.getElementById('current-user-avatar').textContent = user.avatar;
+            updateAssigneeOptions();
+            updateDependencyOptions();
+            updateDepartmentFilters();
+            updatePriorityFilters();
+            updatePerformanceUserFilter(); // Populate performance user filter
+            updatePerformanceDepartmentFilter(); // Populate performance department filter
+            updateDashboard();
+            updateTasksView();
+            updateAssignedTasksView();
+            updateHierarchyView();
+            updatePerformanceView();
+            document.getElementById('voice-input').style.display = 'block';
+            checkReminders(); // Check reminders on login
+        }
+
+        // Login Logic
+        function initializeLogin() {
+            const userSelect = document.getElementById('login-user');
+            userSelect.innerHTML = Object.keys(users).map(id => `<option value="${id}">${users[id].name} (${users[id].role})</option>`).join('');
+            document.querySelectorAll('.page:not(#login)').forEach(page => page.classList.remove('active'));
+            document.getElementById('login').classList.add('active');
+            document.getElementById('voice-input').style.display = 'none'; // Hide voice input on login page
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            currentUser = document.getElementById('login-user').value;
+            document.getElementById('login').classList.remove('active');
+            document.getElementById('dashboard').classList.add('active');
+            updateUserInterface();
+            showNotification(`Welcome, ${users[currentUser].name}! You are logged in to KEPROBA Task Management System.`, 'success');
+            speak(`Welcome, ${users[currentUser].name}. You are now logged in.`);
+        }
+
+        function switchUser() {
+            currentUser = null;
+            initializeLogin();
+            showNotification('Switched user. Please log in again.', 'info');
+            speak('Switched user. Please log in again.');
+        }
+
+        // Filter & Option Population
+        function updateAssigneeOptions() {
+            const assigneeSelect = document.getElementById('task-assignees');
+            const editAssigneeSelect = document.getElementById('edit-task-assignees');
+            const currentUsersCanAssignTo = currentUser ? users[currentUser].canAssignTo : [];
+
+            [assigneeSelect, editAssigneeSelect].forEach(select => {
+                select.innerHTML = '<option value="" disabled>Select Assignee(s)</option>';
+                // Only allow assigning to users within their delegation hierarchy
+                Object.values(users).filter(user => currentUsersCanAssignTo.includes(user.id) || user.id === currentUser).forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = `${user.name} (${user.role})`;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        // Populates the dependencies dropdown for task creation and editing.
+        function updateDependencyOptions() {
+            const dependencySelect = document.getElementById('task-dependencies');
+            const editDependencySelect = document.getElementById('edit-task-dependencies');
+
+            [dependencySelect, editDependencySelect].forEach(select => {
+                select.innerHTML = '<option value="" disabled>Select Dependencies</option>';
+                tasks.filter(task => task.status !== 'done' && task.status !== 'completed').forEach(task => {
+                    const option = document.createElement('option');
+                    option.value = task.id;
+                    option.textContent = `${task.title} (ID: ${task.id})`;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        // Populates department filters in task views
+        function updateDepartmentFilters() {
+            const departments = [...new Set(Object.values(users).map(u => u.department))].sort();
+            ['task-department', 'edit-task-department', 'department-filter', 'assigned-department-filter', 'performance-department-filter'].forEach(id => {
+                const select = document.getElementById(id);
+                if (select) {
+                    const currentSelected = select.value;
+                    select.innerHTML = `<option value="all">${id.includes('department-filter') ? 'All Departments' : 'Select Department'}</option>`;
+                    departments.forEach(dept => {
+                        const option = document.createElement('option');
+                        option.value = dept;
+                        option.textContent = dept;
+                        select.appendChild(option);
+                    });
+                    select.value = currentSelected; // Retain selection
+                }
+            });
+        }
+
+        // Populates priority filters
+        function updatePriorityFilters() {
+            const priorities = ['Critical', 'High', 'Medium', 'Low'];
+            ['task-priority', 'edit-task-priority', 'priority-filter', 'assigned-priority-filter'].forEach(id => {
+                const select = document.getElementById(id);
+                if (select) {
+                    const currentSelected = select.value;
+                    select.innerHTML = `<option value="all">${id.includes('priority-filter') ? 'All Priorities' : 'Select Priority'}</option>`;
+                    priorities.forEach(p => {
+                        const option = document.createElement('option');
+                        option.value = p;
+                        option.textContent = p;
+                        select.appendChild(option);
+                    });
+                    select.value = currentSelected; // Retain selection
+                }
+            });
+        }
+
+        // Populate performance user filter
+        function updatePerformanceUserFilter() {
+            const select = document.getElementById('performance-user-filter');
+            const currentSelected = select.value;
+            select.innerHTML = '<option value="all">All Users</option>';
+            Object.values(users).forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = user.name;
+                select.appendChild(option);
+            });
+            select.value = currentSelected;
+        }
+
+        // Dynamically update assignee tags for multi-select
+        function updateAssigneeTags(selectId, tagsContainerId) {
+            const select = document.getElementById(selectId);
+            const tagsContainer = document.getElementById(tagsContainerId);
+            tagsContainer.innerHTML = '';
+            Array.from(select.selectedOptions).forEach(option => {
+                if (option.value) {
+                    const tag = document.createElement('span');
+                    tag.classList.add('assignee-tag');
+                    tag.innerHTML = `
+                        ${option.textContent}
+                        <span class="remove-tag" data-value="${option.value}" onclick="removeAssigneeTag(this, '${selectId}')">&times;</span>
+                    `;
+                    tagsContainer.appendChild(tag);
+                }
+            });
+        }
+
+        // Remove assignee tag from multi-select
+        function removeAssigneeTag(element, selectId) {
+            const valueToRemove = element.dataset.value;
+            const select = document.getElementById(selectId);
+            Array.from(select.options).forEach(option => {
+                if (option.value === valueToRemove) {
+                    option.selected = false;
+                }
+            });
+            element.parentElement.remove(); // Remove the tag element
+            // Trigger change event to ensure data consistency if needed
+            select.dispatchEvent(new Event('change'));
+        }
+
+        // Display Notification
+        function showNotification(message, type = 'success', duration = 3000) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification show ${type}`;
+            notification.innerHTML = `<i class="material-icons">${getNotificationIcon(type)}</i> ${message}`;
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, duration);
+        }
+
+        function getNotificationIcon(type) {
+            switch (type) {
+                case 'success': return 'check_circle';
+                case 'error': return 'error';
+                case 'warning': return 'warning';
+                case 'info': return 'info';
+                default: return 'notifications';
+            }
+        }
+
+        // Speech Synthesis
+        function speak(text) {
+            if (typeof responsiveVoice !== 'undefined') {
+                responsiveVoice.speak(text);
+            } else {
+                console.warn('ResponsiveVoice.js not loaded.');
+            }
+        }
+
+        // Voice Input (Speech Recognition)
+        let recognition;
+        function startVoiceInput() {
+            if (!('webkitSpeechRecognition' in window)) {
+                showNotification('Speech recognition not supported in this browser.', 'error');
+                speak('Speech recognition not supported in this browser.');
+                return;
+            }
+
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                showNotification('Voice input started. Speak now.', 'info', 2000);
+                document.querySelector('#voice-input button').innerHTML = '<i class="material-icons">mic_off</i> Listening...';
+                document.querySelector('#voice-input button').classList.add('btn-warning');
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript.toLowerCase();
+                console.log('Voice Command:', transcript);
+                processVoiceCommand(transcript);
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                showNotification(`Voice input error: ${event.error}`, 'error');
+                document.querySelector('#voice-input button').innerHTML = '<i class="material-icons">mic</i> Voice Input';
+                document.querySelector('#voice-input button').classList.remove('btn-warning');
+            };
+
+            recognition.onend = () => {
+                document.querySelector('#voice-input button').innerHTML = '<i class="material-icons">mic</i> Voice Input';
+                document.querySelector('#voice-input button').classList.remove('btn-warning');
+                showNotification('Voice input ended.', 'info', 1000);
+            };
+
+            recognition.start();
+        }
+
+        function processVoiceCommand(command) {
+            command = command.toLowerCase();
+
+            // Navigation
+            if (command.includes('show dashboard')) { showPage('dashboard'); speak('Showing dashboard.'); }
+            else if (command.includes('show my tasks')) { showPage('tasks'); speak('Showing my tasks.'); }
+            else if (command.includes('create task')) {
+                showPage('create');
+                const taskTitleMatch = command.match(/create task (.+)/);
+                if (taskTitleMatch && taskTitleMatch[1]) {
+                    document.getElementById('task-title').value = taskTitleMatch[1];
+                    speak(`Ready to create task: ${taskTitleMatch[1]}.`);
+                } else {
+                    speak('Ready to create a new task.');
+                }
+            }
+            else if (command.includes('show assigned tasks') || command.includes('assigned to me')) { showPage('assigned'); speak('Showing tasks assigned to you.'); }
+            else if (command.includes('show organization') || command.includes('show hierarchy')) { showPage('hierarchy'); speak('Showing organizational hierarchy.'); }
+            else if (command.includes('show performance')) { showPage('performance'); speak('Showing performance metrics.'); }
+            else if (command.includes('show help')) { showPage('help'); speak('Showing help and tutorials.'); }
+
+            // Task Actions (simplified)
+            else if (command.includes('update task')) {
+                const idMatch = command.match(/update task (\d+) to (.+)/);
+                if (idMatch && idMatch[1] && idMatch[2]) {
+                    const taskId = parseInt(idMatch[1]);
+                    const newStatus = idMatch[2].replace('in progress', 'in-progress').replace('not started', 'not-started').replace('completed', 'completed').replace('done', 'done');
+                    const task = tasks.find(t => t.id === taskId);
+                    if (task) {
+                        updateTaskStatus(taskId, newStatus);
+                        showNotification(`Task ${taskId} updated to ${newStatus}.`, 'success');
+                        speak(`Task ${taskId} updated to ${newStatus}.`);
+                    } else {
+                        showNotification(`Task ${taskId} not found.`, 'error');
+                        speak(`Task ${taskId} not found.`);
+                    }
+                } else {
+                    showNotification('Command not recognized. Try "Update task [ID] to [status]".', 'warning');
+                    speak('Command not recognized. Try "Update task [ID] to [status]".');
+                }
+            }
+            else if (command.includes('what are my overdue tasks')) {
+                const overdue = tasks.filter(t => t.assignees.includes(currentUser) && new Date(t.dueDate) < new Date() && t.status !== 'done' && t.status !== 'completed');
+                if (overdue.length > 0) {
+                    const titles = overdue.map(t => t.title).join(', ');
+                    showNotification(`You have ${overdue.length} overdue tasks: ${titles}`, 'warning');
+                    speak(`You have ${overdue.length} overdue tasks: ${titles}`);
+                } else {
+                    showNotification('You have no overdue tasks. Great job!', 'success');
+                    speak('You have no overdue tasks. Great job!');
+                }
+            }
+            else if (command.includes('help')) {
+                showPage('help');
+                speak('I can help with navigation and basic task updates. Try "Show tasks" or "Create task [title]".');
+            }
+            else {
+                showNotification('Voice command not recognized.', 'warning');
+                speak('Voice command not recognized.');
+            }
+        }
+
+
+        // Tab Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelector(`.nav-tab[aria-controls="${pageId}"]`).classList.add('active');
+
+            // Specific updates for pages
+            if (pageId === 'dashboard') updateDashboard();
+            if (pageId === 'tasks') updateTasksView();
+            if (pageId === 'assigned') updateAssignedTasksView();
+            if (pageId === 'hierarchy') updateHierarchyView();
+            if (pageId === 'performance') updatePerformanceView();
+            if (pageId === 'create') {
+                resetCreateTaskForm();
+                document.getElementById('task-form').style.display = 'none';
+                document.getElementById('workplan-upload-section').style.display = 'none';
+                document.getElementById('workplan-manual-entry').style.display = 'none';
+                document.getElementById('parsed-tasks-preview').style.display = 'none';
+                document.getElementById('option-upload').classList.remove('selected');
+                document.getElementById('option-manual').classList.remove('selected');
+                workplanOptionSelected = null;
+            }
+        }
+
+        // Task Creation
+        function createTask(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('task-title').value;
+            const description = document.getElementById('task-description').value;
+            const assignees = Array.from(document.getElementById('task-assignees').selectedOptions).map(option => option.value);
+            const priority = document.getElementById('task-priority').value;
+            const dueDate = document.getElementById('task-due-date').value;
+            const department = document.getElementById('task-department').value;
+            const dependencies = Array.from(document.getElementById('task-dependencies').selectedOptions).map(option => parseInt(option.value));
+            const isMilestone = document.getElementById('task-milestone').checked;
+            const files = Array.from(document.getElementById('task-files').files).map(file => ({ name: file.name, url: URL.createObjectURL(file) })); // Simulate file URLs
+
+            if (!title || assignees.length === 0) {
+                showNotification('Task title and assignee(s) are required.', 'error');
+                return;
+            }
+            if (!currentUser) {
+                showNotification('Please log in to create tasks.', 'error');
+                return;
+            }
+
+            const newTask = {
+                id: tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1,
+                title,
+                description,
+                creator: currentUser,
+                assignees: assignees,
+                status: 'not-started',
+                priority: priority !== 'all' ? priority : 'Medium',
+                dueDate: dueDate || null,
+                department: department !== 'all' ? department : 'General',
+                createdAt: new Date(),
+                comments: [],
+                dependencies,
+                isMilestone,
+                files
+            };
+
+            tasks.push(newTask);
+            saveTasks();
+            resetCreateTaskForm();
+            updateTasksView();
+            updateDashboard();
+            updateAssignedTasksView();
+            updateDependencyOptions(); // Update dependencies for future tasks
+            showNotification(`Task "${newTask.title}" created and delegated successfully!`, 'success');
+            speak(`Task ${newTask.title} created successfully.`);
+            notifyDelegatedTask(newTask); // Send email notification
+
+            addWorkflowEvent(currentUser, 'created', newTask.id, newTask.title, newTask.assignees.map(a => users[a].name).join(', '));
+            showPage('tasks');
+        }
+
+        function resetCreateTaskForm() {
+            document.getElementById('task-form').reset();
+            document.getElementById('task-assignees').value = '';
+            document.getElementById('task-priority').value = 'all';
+            document.getElementById('task-department').value = 'all';
+            document.getElementById('task-dependencies').value = '';
+            document.getElementById('create-assignee-tags').innerHTML = ''; // Clear assignee tags
+            document.getElementById('task-milestone').checked = false;
+        }
+
+        // Task Display & Filtering (My Tasks)
+        function updateTasksView() {
+            const myTasksList = document.getElementById('my-tasks-list');
+            myTasksList.innerHTML = '';
+            const searchTerm = document.getElementById('task-search').value.toLowerCase();
+            const statusFilter = document.getElementById('tasks-filter').value;
+            const departmentFilter = document.getElementById('department-filter').value;
+            const priorityFilter = document.getElementById('priority-filter').value;
+            const sortBy = document.getElementById('sort-by').value;
+
+            let filteredTasks = tasks.filter(task => task.creator === currentUser);
+
+            if (searchTerm) {
+                filteredTasks = filteredTasks.filter(task =>
+                    task.title.toLowerCase().includes(searchTerm) ||
+                    task.description.toLowerCase().includes(searchTerm)
+                );
+            }
+            if (statusFilter !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.status === statusFilter);
+            }
+            if (departmentFilter !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.department === departmentFilter);
+            }
+            if (priorityFilter !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.priority === priorityFilter);
+            }
+
+            // Sorting logic
+            if (sortBy === 'dueDate') {
+                filteredTasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+            } else if (sortBy === 'priority') {
+                const priorityOrder = { 'Critical': 4, 'High': 3, 'Medium': 2, 'Low': 1 };
+                filteredTasks.sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority]);
+            } else if (sortBy === 'createdAt') {
+                filteredTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            }
+
+            if (filteredTasks.length === 0) {
+                myTasksList.innerHTML = '<p style="text-align: center; color: var(--medium-gray); padding: 20px;">No tasks found matching your criteria.</p>';
+                return;
+            }
+
+            filteredTasks.forEach(task => {
+                const taskElement = createTaskElement(task, 'creator');
+                myTasksList.appendChild(taskElement);
+            });
+        }
+
+        // Task Display & Filtering (Assigned to Me)
+        function updateAssignedTasksView() {
+            const assignedTasksList = document.getElementById('assigned-tasks-list');
+            assignedTasksList.innerHTML = '';
+            const assignedNotice = document.getElementById('assigned-tasks-notice');
+            assignedNotice.innerHTML = '';
+
+            const searchTerm = document.getElementById('assigned-task-search').value.toLowerCase();
+            const statusFilter = document.getElementById('assigned-filter').value;
+            const departmentFilter = document.getElementById('assigned-department-filter').value;
+            const priorityFilter = document.getElementById('assigned-priority-filter').value;
+
+            let filteredTasks = tasks.filter(task => task.assignees.includes(currentUser));
+
+            if (searchTerm) {
+                filteredTasks = filteredTasks.filter(task =>
+                    task.title.toLowerCase().includes(searchTerm) ||
+                    task.description.toLowerCase().includes(searchTerm)
+                );
+            }
+            if (statusFilter !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.status === statusFilter);
+            }
+            if (departmentFilter !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.department === departmentFilter);
+            }
+            if (priorityFilter !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.priority === priorityFilter);
+            }
+
+            if (filteredTasks.length === 0) {
+                assignedTasksList.innerHTML = '<p style="text-align: center; color: var(--medium-gray); padding: 20px;">No tasks assigned to you found matching your criteria.</p>';
+                return;
+            }
+
+            filteredTasks.forEach(task => {
+                const taskElement = createTaskElement(task, 'assignee');
+                assignedTasksList.appendChild(taskElement);
+            });
+        }
+
+
+        // Common function to create task HTML element
+        function createTaskElement(task, context) {
+            const taskElement = document.createElement('div');
+            taskElement.classList.add('task-item');
+            if (task.isMilestone) {
+                taskElement.style.borderRight = '6px solid var(--info-color)';
+            }
+            if (new Date(task.dueDate) < new Date() && task.status !== 'done' && task.status !== 'completed') {
+                taskElement.style.borderLeftColor = var_primary_red; // Overdue visual cue
+            }
+
+            const assigneeNames = task.assignees.map(id => users[id] ? users[id].name : 'Unknown').join(', ');
+            const creatorName = users[task.creator] ? users[task.creator].name : 'Unknown';
+            const dueDateText = task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No Due Date';
+
+            const fileListHtml = task.files.length > 0 ?
+                `<div class="file-list"><strong>Attachments:</strong> ${task.files.map(f => `<div class="file-item"><i class="material-icons">attachment</i> <a href="${f.url}" target="_blank" download>${f.name}</a></div>`).join('')}</div>` : '';
+
+            let actionsHtml = '';
+            if (context === 'assignee') {
+                // If the current user is an assignee, allow them to change status
+                actionsHtml = `
+                    <button class="btn btn-warning task-status status-not-started" onclick="updateTaskStatus(${task.id}, 'not-started')">Not Started</button>
+                    <button class="btn btn-info task-status status-in-progress" onclick="updateTaskStatus(${task.id}, 'in-progress')">In Progress</button>
+                    <button class="btn btn-success task-status status-completed" onclick="updateTaskStatus(${task.id}, 'completed')">Completed</button>
+                    <button class="btn btn-success task-status status-done" onclick="updateTaskStatus(${task.id}, 'done')">Done</button>
+                `;
+            } else if (context === 'creator' && currentUser === task.creator) {
+                // If the current user created the task, allow editing and viewing workflow
+                actionsHtml += `
+                    <button class="btn btn-secondary" onclick="openEditModal(${task.id})"><i class="material-icons">edit</i> Edit Task</button>
+                `;
+            }
+
+            taskElement.innerHTML = `
+                <div class="task-header">
+                    <span class="task-title">${task.title}</span>
+                    <span class="task-status status-${task.status.replace(/-/g, '')}">${task.status}</span>
+                </div>
+                <div class="task-meta">
+                    <span><i class="material-icons">person</i> Assigned to: <strong>${assigneeNames}</strong></span>
+                    <span><i class="material-icons">priority_high</i> Priority: <strong>${task.priority}</strong></span>
+                    <span><i class="material-icons">event</i> Due: <strong>${dueDateText}</strong></span>
+                    <span><i class="material-icons">calendar_today</i> Created: <strong>${task.createdAt.toLocaleDateString()}</strong></span>
+                    <span><i class="material-icons">apartment</i> Department: <strong>${task.department}</strong></span>
+                    <span><i class="material-icons">person_add</i> Creator: <strong>${creatorName}</strong></span>
+                    ${task.isMilestone ? '<span><i class="material-icons">flag</i> Milestone</span>' : ''}
+                    ${task.dependencies.length > 0 ? `<span><i class="material-icons">link</i> Dependencies: ${task.dependencies.map(depId => tasks.find(t => t.id === depId)?.title || 'N/A').join(', ')}</span>` : ''}
+                </div>
+                <p>${task.description || 'No description provided.'}</p>
+                ${fileListHtml}
+                <div class="progress-bar"><div class="progress-fill" style="width: ${getTaskProgress(task.status)}%;"></div></div>
+                <div class="task-actions">${actionsHtml}</div>
+                <div class="task-comments">
+                    <h4><i class="material-icons">comment</i> Comments (${task.comments.length})</h4>
+                    <div id="comments-list-${task.id}"></div>
+                    <div class="add-comment">
+                        <input type="text" class="comment-input" id="new-comment-input-${task.id}" placeholder="Add a comment...">
+                        <button class="btn btn-primary btn-sm" onclick="addComment(${task.id})"><i class="material-icons">add_comment</i> Add</button>
+                    </div>
+                </div>
+            `;
+            // Populate comments after the element is in the DOM
+            const commentsList = taskElement.querySelector(`#comments-list-${task.id}`);
+            task.comments.forEach(comment => {
+                const commentElement = document.createElement('div');
+                commentElement.classList.add('comment');
+                commentElement.innerHTML = `
+                    <div class="comment-author">
+                        ${users[comment.author] ? users[comment.author].name : 'Unknown'}
+                        <span class="timestamp">${comment.timestamp.toLocaleString()}</span>
+                    </div>
+                    <p>${comment.text}</p>
+                `;
+                commentsList.appendChild(commentElement);
+            });
+            return taskElement;
+        }
+
+        function getTaskProgress(status) {
+            switch (status) {
+                case 'not-started': return 0;
+                case 'in-progress': return 50;
+                case 'completed': return 90; // Almost done, but needs final review
+                case 'done': return 100;
+                default: return 0;
+            }
+        }
+
+        // Update Task Status
+        function updateTaskStatus(taskId, newStatus) {
+            const taskIndex = tasks.findIndex(t => t.id === taskId);
+            if (taskIndex > -1) {
+                const oldStatus = tasks[taskIndex].status;
+                tasks[taskIndex].status = newStatus;
+                saveTasks();
+                updateTasksView();
+                updateAssignedTasksView();
+                updateDashboard();
+                updatePerformanceView();
+                showNotification(`Task "${tasks[taskIndex].title}" status updated to "${newStatus}".`, 'success');
+                speak(`Task ${tasks[taskIndex].title} status updated to ${newStatus}.`);
+
+                addWorkflowEvent(currentUser, 'updated status of', taskId, tasks[taskIndex].title, `from ${oldStatus} to ${newStatus}`);
+            }
+        }
+
+        // Edit Task Modal
+        function openEditModal(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) {
+                showNotification('Task not found.', 'error');
+                return;
+            }
+
+            document.getElementById('edit-task-id').value = task.id;
+            document.getElementById('edit-task-title').value = task.title;
+            document.getElementById('edit-task-description').value = task.description;
+
+            // Populate assignees and set selected
+            const editAssigneeSelect = document.getElementById('edit-task-assignees');
+            editAssigneeSelect.value = ''; // Clear existing selection
+            Array.from(editAssigneeSelect.options).forEach(option => option.selected = false); // Deselect all
+
+            task.assignees.forEach(assigneeId => {
+                const option = Array.from(editAssigneeSelect.options).find(opt => opt.value === assigneeId);
+                if (option) option.selected = true;
+            });
+            updateAssigneeTags('edit-task-assignees', 'edit-assignee-tags');
+
+
+            document.getElementById('edit-task-priority').value = task.priority;
+            document.getElementById('edit-task-due-date').value = task.dueDate;
+            document.getElementById('edit-task-department').value = task.department;
+
+            // Populate dependencies
+            const editDependenciesSelect = document.getElementById('edit-task-dependencies');
+            editDependenciesSelect.value = '';
+            Array.from(editDependenciesSelect.options).forEach(option => option.selected = false);
+            task.dependencies.forEach(depId => {
+                const option = Array.from(editDependenciesSelect.options).find(opt => parseInt(opt.value) === depId);
+                if (option) option.selected = true;
+            });
+
+            document.getElementById('edit-task-milestone').checked = task.isMilestone;
+
+            // Display current attached files
+            const filesPreview = document.getElementById('edit-task-files-preview');
+            filesPreview.innerHTML = '<h4>Existing Files:</h4>';
+            if (task.files && task.files.length > 0) {
+                task.files.forEach(file => {
+                    const fileItem = document.createElement('div');
+                    fileItem.classList.add('file-item');
+                    fileItem.innerHTML = `<i class="material-icons">attach_file</i> <a href="${file.url}" target="_blank" download>${file.name}</a>`;
+                    filesPreview.appendChild(fileItem);
+                });
+            } else {
+                filesPreview.innerHTML += '<p>No files attached.</p>';
+            }
+
+            // Load and display comments
+            const commentsList = document.getElementById('edit-task-comments-list');
+            commentsList.innerHTML = '';
+            task.comments.forEach(comment => {
+                const commentElement = document.createElement('div');
+                commentElement.classList.add('comment');
+                commentElement.innerHTML = `
+                    <div class="comment-author">
+                        ${users[comment.author] ? users[comment.author].name : 'Unknown'}
+                        <span class="timestamp">${comment.timestamp.toLocaleString()}</span>
+                    </div>
+                    <p>${comment.text}</p>
+                `;
+                commentsList.appendChild(commentElement);
+            });
+
+
+            document.getElementById('edit-task-modal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-task-modal').style.display = 'none';
+        }
+
+        function saveTaskEdit(event) {
+            event.preventDefault();
+            const taskId = parseInt(document.getElementById('edit-task-id').value);
+            const taskIndex = tasks.findIndex(t => t.id === taskId);
+
+            if (taskIndex > -1) {
+                const task = tasks[taskIndex];
+                const oldAssignees = [...task.assignees]; // Clone for comparison
+
+                task.title = document.getElementById('edit-task-title').value;
+                task.description = document.getElementById('edit-task-description').value;
+                task.assignees = Array.from(document.getElementById('edit-task-assignees').selectedOptions).map(option => option.value);
+                task.priority = document.getElementById('edit-task-priority').value;
+                task.dueDate = document.getElementById('edit-task-due-date').value;
+                task.department = document.getElementById('edit-task-department').value;
+                task.dependencies = Array.from(document.getElementById('edit-task-dependencies').selectedOptions).map(option => parseInt(option.value));
+                task.isMilestone = document.getElementById('edit-task-milestone').checked;
+
+                const newFiles = Array.from(document.getElementById('edit-task-files').files).map(file => ({ name: file.name, url: URL.createObjectURL(file) }));
+                task.files = [...task.files, ...newFiles]; // Add new files, keep old ones
+
+                saveTasks();
+                closeEditModal();
+                updateTasksView();
+                updateAssignedTasksView();
+                updateDashboard();
+                updateDependencyOptions(); // Update dependencies dropdown as tasks might change
+                showNotification(`Task "${task.title}" updated successfully!`, 'success');
+                speak(`Task ${task.title} updated.`);
+
+                // Check for assignee changes and send notifications
+                const newlyAssigned = task.assignees.filter(id => !oldAssignees.includes(id));
+                newlyAssigned.forEach(assigneeId => {
+                    const assignee = users[assigneeId];
+                    if (assignee && assignee.email) {
+                        const subject = `Task Re-assigned/Delegated to You: ${task.title}`;
+                        const body = `Dear ${assignee.name},\n\nYou have been assigned to the task: "${task.title}".\nDescription: ${task.description}\nDue Date: ${task.dueDate}\nPriority: ${task.priority}\n\nPlease log in to the KEPROBA Task Management System to view full details and start working on it.\n\nBest regards,\nKEPROBA Task Management System`;
+                        sendEmailNotification(assignee.email, subject, body);
+                        addWorkflowEvent(currentUser, 'assigned', taskId, task.title, users[assigneeId].name);
+                    }
+                });
+
+                if (newlyAssigned.length === 0 && task.assignees.length > 0) {
+                    addWorkflowEvent(currentUser, 'edited', taskId, task.title, 'details');
+                }
+            } else {
+                showNotification('Error updating task.', 'error');
+            }
+        }
+
+        // Add Comment
+        function addComment(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            const commentInput = document.getElementById(`new-comment-input-${taskId}`); // For main view
+            let commentText = commentInput.value.trim();
+
+            if (document.getElementById('edit-task-modal').style.display === 'flex') {
+                const editCommentInput = document.getElementById('new-comment-input'); // For modal
+                commentText = editCommentInput.value.trim();
+                if (!commentText) return;
+                task.comments.push({ author: currentUser, text: commentText, timestamp: new Date() });
+                editCommentInput.value = '';
+                openEditModal(taskId); // Re-render modal comments
+                showNotification('Comment added successfully!', 'success');
+                addWorkflowEvent(currentUser, 'commented on', taskId, task.title);
+            } else {
+                if (!commentText) return;
+                task.comments.push({ author: currentUser, text: commentText, timestamp: new Date() });
+                commentInput.value = '';
+                updateTasksView(); // Re-render task list
+                updateAssignedTasksView(); // Re-render assigned tasks list
+                showNotification('Comment added successfully!', 'success');
+                addWorkflowEvent(currentUser, 'commented on', taskId, task.title);
+            }
+            saveTasks();
+        }
+
+        // Dashboard Update
+        function updateDashboard() {
+            if (!currentUser) return;
+
+            const dashboardStats = document.getElementById('dashboard-stats');
+            dashboardStats.innerHTML = '';
+
+            const userTasks = tasks.filter(task => task.assignees.includes(currentUser));
+            const createdTasks = tasks.filter(task => task.creator === currentUser);
+
+            const filterStatus = document.getElementById('dashboard-filter').value;
+
+            const myActiveTasks = userTasks.filter(t => t.status !== 'done' && t.status !== 'completed');
+            const myCompletedTasks = userTasks.filter(t => t.status === 'done' || t.status === 'completed');
+            const myOverdueTasks = myActiveTasks.filter(t => new Date(t.dueDate) < new Date());
+            const myInProgressTasks = myActiveTasks.filter(t => t.status === 'in-progress');
+            const myNotStartedTasks = myActiveTasks.filter(t => t.status === 'not-started');
+
+            const totalCreatedTasks = createdTasks.length;
+            const createdInProgress = createdTasks.filter(t => t.status === 'in-progress').length;
+            const createdCompleted = createdTasks.filter(t => t.status === 'done' || t.status === 'completed').length;
+            const createdNotStarted = createdTasks.filter(t => t.status === 'not-started').length;
+
+            const stats = [
+                { label: 'My Total Assigned', number: userTasks.length, icon: 'assignment' },
+                { label: 'My In Progress', number: myInProgressTasks.length, icon: 'work' },
+                { label: 'My Completed', number: myCompletedTasks.length, icon: 'check_box' },
+                { label: 'My Overdue', number: myOverdueTasks.length, icon: 'error' },
+                { label: 'Tasks I Created', number: totalCreatedTasks, icon: 'add_task' },
+                { label: 'Created In Progress', number: createdInProgress, icon: 'pending_actions' },
+                { label: 'Created Completed', number: createdCompleted, icon: 'task_alt' },
+                { label: 'Created Not Started', number: createdNotStarted, icon: 'playlist_add' }
+            ];
+
+            // Apply filter to stats display
+            const filteredStats = stats.filter(stat => {
+                if (filterStatus === 'all') return true;
+                if (stat.label.includes('Completed') && (filterStatus === 'completed' || filterStatus === 'done')) return true;
+                if (stat.label.includes('Progress') && filterStatus === 'in-progress') return true;
+                if (stat.label.includes('Overdue') && filterStatus === 'overdue') return true;
+                if (stat.label.includes('Not Started') && filterStatus === 'not-started') return true;
+                // Add more specific filtering if needed for other stats
+                return false;
+            });
+            if (filterStatus === 'all') { // Show all if filter is 'all'
+                stats.forEach(stat => {
+                    dashboardStats.innerHTML += `
+                        <div class="stat-item">
+                            <i class="material-icons">${stat.icon}</i>
+                            <div class="stat-number">${stat.number}</div>
+                            <div class="stat-label">${stat.label}</div>
+                        </div>
+                    `;
+                });
+            } else { // Show only filtered stats
+                 filteredStats.forEach(stat => {
+                    dashboardStats.innerHTML += `
+                        <div class="stat-item">
+                            <i class="material-icons">${stat.icon}</i>
+                            <div class="stat-number">${stat.number}</div>
+                            <div class="stat-label">${stat.label}</div>
+                        </div>
+                    `;
+                });
+            }
+
+
+            // Recent Activities (simulated as latest 5 tasks related to user)
+            const recentActivities = document.getElementById('recent-activities');
+            recentActivities.innerHTML = '<h3 class="card-title" style="font-size: 18px; margin-bottom: 15px;"><i class="material-icons">fiber_new</i> Latest Updates</h3>';
+            const allUserRelatedTasks = tasks.filter(t => t.creator === currentUser || t.assignees.includes(currentUser));
+            allUserRelatedTasks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()); // Sort by creation date, newest first
+
+            if (allUserRelatedTasks.length > 0) {
+                allUserRelatedTasks.slice(0, 5).forEach(task => {
+                    recentActivities.innerHTML += `
+                        <div class="task-item" style="border-left-color: var(--accent-blue); padding: 15px; margin-bottom: 10px;">
+                            <div style="font-weight: 600; font-size: 15px; color: var(--primary-green);">${task.title}</div>
+                            <div style="font-size: 13px; color: var(--dark-gray); margin-top: 5px;">
+                                Status: <span class="task-status status-${task.status.replace(/-/g, '')}" style="padding: 3px 8px; font-size: 11px;">${task.status}</span>
+                                &bull; Due: ${task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A'}
+                                &bull; Assigned to: ${task.assignees.map(id => users[id] ? users[id].name : 'Unknown').join(', ')}
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                recentActivities.innerHTML += '<p style="text-align: center; color: var(--medium-gray); padding: 10px;">No recent activities.</p>';
+            }
+
+            updateWorkflowTrail(); // Update workflow trail when dashboard updates
+        }
+
+        // Hierarchy View
+        function updateHierarchyView() {
+            const hierarchyContent = document.getElementById('hierarchy-content');
+            hierarchyContent.innerHTML = '';
+
+            const buildHierarchy = (managerId, level) => {
+                let html = '';
+                const directReports = Object.values(users).filter(user => user.manager === managerId);
+                directReports.sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically
+
+                directReports.forEach(user => {
+                    // Calculate tasks for this user
+                    const assignedTasks = tasks.filter(t => t.assignees.includes(user.id));
+                    const completedTasks = assignedTasks.filter(t => t.status === 'done' || t.status === 'completed').length;
+                    const inProgressTasks = assignedTasks.filter(t => t.status === 'in-progress').length;
+                    const notStartedTasks = assignedTasks.filter(t => t.status === 'not-started').length;
+                    const overdueTasks = assignedTasks.filter(t => new Date(t.dueDate) < new Date() && t.status !== 'done' && t.status !== 'completed').length;
+
+                    html += `
+                        <div class="hierarchy-level level-${level}">
+                            <div class="hierarchy-item" data-tooltip="${user.name} (${user.role}) - Dept: ${user.department}">
+                                <div class="hierarchy-user-avatar">${user.avatar}</div>
+                                <div>
+                                    <strong>${user.name}</strong> <span class="role-indicator">${user.role}</span>
+                                    <div style="font-size: 13px; color: var(--dark-gray); margin-top: 5px;">
+                                        Total Tasks: ${assignedTasks.length} | In Progress: ${inProgressTasks} | Completed: ${completedTasks} | Overdue: ${overdueTasks}
+                                    </div>
+                                </div>
+                            </div>
+                            ${buildHierarchy(user.id, level + 1)}
+                        </div>
+                    `;
+                });
+                return html;
+            };
+
+            const ceo = users['floice_mukabana']; // Assuming Floice Mukabana is the CEO
+            if (ceo) {
+                hierarchyContent.innerHTML = `
+                    <div class="hierarchy-level level-0">
+                        <div class="hierarchy-item" style="border-left-color: var(--primary-green);">
+                            <div class="hierarchy-user-avatar">${ceo.avatar}</div>
+                            <div>
+                                <strong>${ceo.name}</strong> <span class="role-indicator">${ceo.role}</span>
+                                <div style="font-size: 13px; color: var(--dark-gray); margin-top: 5px;">
+                                    Total Created: ${tasks.filter(t => t.creator === ceo.id).length}
+                                </div>
+                            </div>
+                        </div>
+                        ${buildHierarchy(ceo.id, 1)}
+                    </div>
+                `;
+            } else {
+                hierarchyContent.innerHTML = '<p style="text-align: center; color: var(--medium-gray); padding: 20px;">Organizational hierarchy not fully defined.</p>';
+            }
+        }
+
+        // Performance View
+        function updatePerformanceView() {
+            const performanceStatsDiv = document.getElementById('performance-stats');
+            performanceStatsDiv.innerHTML = '';
+
+            const selectedUser = document.getElementById('performance-user-filter').value;
+            const selectedTime = document.getElementById('performance-time-filter').value;
+            const selectedDepartment = document.getElementById('performance-department-filter').value;
+
+            let filteredTasksForPerformance = tasks;
+
+            if (selectedUser !== 'all') {
+                filteredTasksForPerformance = filteredTasksForPerformance.filter(t => t.assignees.includes(selectedUser) || t.creator === selectedUser);
+            }
+            if (selectedDepartment !== 'all') {
+                filteredTasksForPerformance = filteredTasksForPerformance.filter(t => t.department === selectedDepartment);
+            }
+
+            const now = new Date();
+            filteredTasksForPerformance = filteredTasksForPerformance.filter(task => {
+                const taskDate = task.createdAt; // Or task.dueDate, depending on what 'time' refers to
+                switch (selectedTime) {
+                    case 'week': return taskDate >= new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+                    case 'month': return taskDate.getMonth() === now.getMonth() && taskDate.getFullYear() === now.getFullYear();
+                    case 'quarter':
+                        const currentQuarter = Math.floor((now.getMonth() + 3) / 3);
+                        const taskQuarter = Math.floor((taskDate.getMonth() + 3) / 3);
+                        return taskQuarter === currentQuarter && taskDate.getFullYear() === now.getFullYear();
+                    case 'year': return taskDate.getFullYear() === now.getFullYear();
+                    default: return true; // 'all' time
+                }
+            });
+
+            const totalTasks = filteredTasksForPerformance.length;
+            const completedTasks = filteredTasksForPerformance.filter(t => t.status === 'done' || t.status === 'completed').length;
+            const inProgressTasks = filteredTasksForPerformance.filter(t => t.status === 'in-progress').length;
+            const notStartedTasks = filteredTasksForPerformance.filter(t => t.status === 'not-started').length;
+            const overdueTasks = filteredTasksForPerformance.filter(t => new Date(t.dueDate) < new Date() && t.status !== 'done' && t.status !== 'completed').length;
+            const completionRate = totalTasks > 0 ? ((completedTasks / totalTasks) * 100).toFixed(1) : 0;
+
+            performanceStatsDiv.innerHTML = `
+                <div class="stat-item">
+                    <i class="material-icons">assignment</i>
+                    <div class="stat-number">${totalTasks}</div>
+                    <div class="stat-label">Total Tasks</div>
+                </div>
+                <div class="stat-item">
+                    <i class="material-icons">check_box</i>
+                    <div class="stat-number">${completedTasks}</div>
+                    <div class="stat-label">Completed Tasks</div>
+                </div>
+                <div class="stat-item">
+                    <i class="material-icons">pending_actions</i>
+                    <div class="stat-number">${inProgressTasks}</div>
+                    <div class="stat-label">In Progress</div>
+                </div>
+                <div class="stat-item">
+                    <i class="material-icons">error</i>
+                    <div class="stat-number">${overdueTasks}</div>
+                    <div class="stat-label">Overdue Tasks</div>
+                </div>
+                <div class="stat-item">
+                    <i class="material-icons">show_chart</i>
+                    <div class="stat-number">${completionRate}%</div>
+                    <div class="stat-label">Completion Rate</div>
+                </div>
+            `;
+
+            renderTaskTrendsChart(filteredTasksForPerformance);
+            renderCompletionRateChart(filteredTasksForPerformance);
+            renderPriorityDistributionChart(filteredTasksForPerformance);
+            renderOverdueTasksChart(filteredTasksForPerformance);
+        }
+
+        // Performance Charts
+        function renderTaskTrendsChart(data) {
+            const ctx = document.getElementById('task-trends-chart').getContext('2d');
+            if (taskTrendsChart) taskTrendsChart.destroy();
+
+            // Group tasks by creation month
+            const monthlyCounts = {};
+            data.forEach(task => {
+                const monthYear = task.createdAt.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+                monthlyCounts[monthYear] = (monthlyCounts[monthYear] || 0) + 1;
+            });
+
+            const labels = Object.keys(monthlyCounts).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+            const dataValues = labels.map(label => monthlyCounts[label]);
+
+            taskTrendsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Tasks Created Over Time',
+                        data: dataValues,
+                        borderColor: var_primary_green,
+                        backgroundColor: 'rgba(0, 100, 0, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: var_accent_blue,
+                        pointBorderColor: var_accent_blue,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Task Creation Trends', font: { size: 18, weight: 'bold' } },
+                        tooltip: { mode: 'index', intersect: false },
+                        legend: { display: true, position: 'top' },
+                        datalabels: { display: false } // Disable if not needed for line charts
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Month' } },
+                        y: { beginAtZero: true, title: { display: true, text: 'Number of Tasks' } }
+                    }
+                }
+            });
+        }
+
+        function renderCompletionRateChart(data) {
+            const ctx = document.getElementById('completion-rate-chart').getContext('2d');
+            if (completionRateChart) completionRateChart.destroy();
+
+            const completed = data.filter(t => t.status === 'done' || t.status === 'completed').length;
+            const inProgress = data.filter(t => t.status === 'in-progress').length;
+            const notStarted = data.filter(t => t.status === 'not-started').length;
+            const overdue = data.filter(t => new Date(t.dueDate) < new Date() && t.status !== 'done' && t.status !== 'completed').length;
+
+            completionRateChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'In Progress', 'Not Started', 'Overdue'],
+                    datasets: [{
+                        data: [completed, inProgress, notStarted, overdue],
+                        backgroundColor: [var_success_color, var_warning_color, var_medium_gray, var_primary_red],
+                        borderColor: var_primary_white,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Task Status Distribution', font: { size: 18, weight: 'bold' } },
+                        tooltip: { callbacks: { label: function(context) {
+                            let label = context.label || '';
+                            if (label) { label += ': '; }
+                            if (context.parsed !== null) { label += context.parsed; }
+                            return label;
+                        }}},
+                        legend: { position: 'right' },
+                        datalabels: { // Use datalabels for percentages
+                            color: '#fff',
+                            formatter: (value, context) => {
+                                const total = context.chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
+                                return percentage;
+                            },
+                            font: { weight: 'bold', size: 12 }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        function renderPriorityDistributionChart(data) {
+            const ctx = document.getElementById('priority-distribution-chart').getContext('2d');
+            if (priorityDistributionChart) priorityDistributionChart.destroy();
+
+            const priorityCounts = { 'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0 };
+            data.forEach(task => {
+                if (priorityCounts.hasOwnProperty(task.priority)) {
+                    priorityCounts[task.priority]++;
+                }
+            });
+
+            priorityDistributionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Critical', 'High', 'Medium', 'Low'],
+                    datasets: [{
+                        label: 'Number of Tasks',
+                        data: Object.values(priorityCounts),
+                        backgroundColor: [var_primary_red, var_warning_color, var_accent_blue, var_primary_green],
+                        borderColor: var_primary_black,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Task Priority Distribution', font: { size: 18, weight: 'bold' } },
+                        legend: { display: false },
+                        datalabels: { // Show value on top of bars
+                            anchor: 'end',
+                            align: 'top',
+                            color: var_primary_black,
+                            font: { weight: 'bold', size: 12 }
+                        }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Priority Level' } },
+                        y: { beginAtZero: true, title: { display: true, text: 'Number of Tasks' } }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        function renderOverdueTasksChart(data) {
+            const ctx = document.getElementById('overdue-tasks-chart').getContext('2d');
+            if (overdueTasksChart) overdueTasksChart.destroy();
+
+            const overdueTasks = data.filter(t => new Date(t.dueDate) < new Date() && t.status !== 'done' && t.status !== 'completed');
+
+            // Group overdue tasks by department
+            const departmentOverdueCounts = {};
+            overdueTasks.forEach(task => {
+                departmentOverdueCounts[task.department] = (departmentOverdueCounts[task.department] || 0) + 1;
+            });
+
+            const labels = Object.keys(departmentOverdueCounts);
+            const dataValues = labels.map(label => departmentOverdueCounts[label]);
+
+            overdueTasksChart = new Chart(ctx, {
+                type: 'polarArea',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(153, 102, 255, 0.7)',
+                            'rgba(255, 159, 64, 0.7)'
+                        ],
+                        borderColor: var_primary_white,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Overdue Tasks by Department', font: { size: 18, weight: 'bold' } },
+                        legend: { position: 'right' },
+                        tooltip: { callbacks: { label: function(context) {
+                            let label = context.label || '';
+                            if (label) { label += ': '; }
+                            if (context.parsed !== null) { label += context.parsed; }
+                            return label;
+                        }}},
+                        datalabels: { // Show value directly on segments
+                            color: '#fff',
+                            formatter: (value) => value,
+                            font: { weight: 'bold', size: 12 }
+                        }
+                    },
+                    scales: { r: { display: false } } // Hide radial scale
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+
+        // Workflow Trail
+        let workflowEvents = [];
+        function addWorkflowEvent(actorId, action, taskId, taskTitle, details = '') {
+            const actorName = users[actorId] ? users[actorId].name : 'Unknown User';
+            const event = {
+                timestamp: new Date(),
+                actor: actorName,
+                action: action,
+                taskId: taskId,
+                taskTitle: taskTitle,
+                details: details
+            };
+            workflowEvents.unshift(event); // Add to the beginning for most recent first
+            if (workflowEvents.length > 20) workflowEvents.pop(); // Keep trail manageable
+            localStorage.setItem('keproba_workflow_events', JSON.stringify(workflowEvents));
+            updateWorkflowTrail();
+        }
+
+        function loadWorkflowEvents() {
+            const savedEvents = localStorage.getItem('keproba_workflow_events');
+            if (savedEvents) {
+                workflowEvents = JSON.parse(savedEvents).map(e => ({ ...e, timestamp: new Date(e.timestamp) }));
+            }
+        }
+
+        function updateWorkflowTrail() {
+            const workflowDisplay = document.getElementById('workflow-events');
+            workflowDisplay.innerHTML = '';
+            if (workflowEvents.length === 0) {
+                workflowDisplay.innerHTML = '<p style="text-align: center; color: var(--medium-gray); padding: 10px;">No workflow events recorded yet.</p>';
+                return;
+            }
+
+            workflowEvents.forEach(event => {
+                let icon = '';
+                if (event.action.includes('created')) icon = 'add';
+                else if (event.action.includes('updated status')) icon = 'update';
+                else if (event.action.includes('commented')) icon = 'chat';
+                else if (event.action.includes('assigned')) icon = 'person_add';
+                else if (event.action.includes('edited')) icon = 'edit_note';
+
+                workflowDisplay.innerHTML += `
+                    <div class="workflow-item">
+                        <div class="workflow-icon"><i class="material-icons">${icon}</i></div>
+                        <div class="workflow-content">
+                            <strong>${event.actor}</strong> ${event.action} task ID <a href="#" onclick="openEditModal(${event.taskId})">#${event.taskId} - "${event.taskTitle}"</a>
+                            ${event.details ? ` (${event.details})` : ''}
+                            <br><span style="font-size: 12px; color: var(--medium-gray);">${event.timestamp.toLocaleString()}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // High Contrast Mode
+        function toggleHighContrast() {
+            document.body.toggleAttribute('high-contrast');
+            const isHighContrast = document.body.hasAttribute('high-contrast');
+            localStorage.setItem('highContrastMode', isHighContrast ? 'true' : 'false');
+            showNotification(`High contrast mode ${isHighContrast ? 'enabled' : 'disabled'}.`, 'info');
+        }
+
+        function applyHighContrastSetting() {
+            const savedSetting = localStorage.getItem('highContrastMode');
+            if (savedSetting === 'true') {
+                document.body.setAttribute('high-contrast', '');
+            }
+        }
+
+        // Workplan Integration (Conceptual Parsing / Manual Entry)
+        function selectWorkplanOption(option) {
+            workplanOptionSelected = option;
+            document.getElementById('option-upload').classList.remove('selected');
+            document.getElementById('option-manual').classList.remove('selected');
+            document.getElementById(`option-${option}`).classList.add('selected');
+
+            if (option === 'upload') {
+                document.getElementById('workplan-upload-section').style.display = 'block';
+                document.getElementById('task-form').style.display = 'none';
+                document.getElementById('workplan-manual-entry').style.display = 'none';
+            } else if (option === 'manual') {
+                document.getElementById('workplan-manual-entry').style.display = 'block';
+                document.getElementById('task-form').style.display = 'none';
+                document.getElementById('workplan-upload-section').style.display = 'none';
+                document.getElementById('parsed-tasks-preview').style.display = 'none';
+                addManualTaskField(); // Ensure at least one field is present
+            }
+        }
+
+        // Simulate Workplan Upload Parsing
+        function handleWorkplanUpload() {
+            const fileInput = document.getElementById('workplan-file');
+            if (fileInput.files.length === 0) {
+                document.getElementById('parsed-tasks-preview').style.display = 'none';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            showNotification(`Parsing "${file.name}"... This is a simulated process.`, 'info');
+
+            // Simulate parsing delay and result
+            setTimeout(() => {
+                const parsedTasks = [
+                    { title: 'Draft Marketing Plan Q3', description: 'Outline Q3 marketing initiatives and budget.', assignee: 'maureen_mambo', priority: 'High', dueDate: '2025-08-10', department: 'Nation Brand Development' },
+                    { title: 'Renew Software Licenses', description: 'Ensure all software licenses for IT department are up to date.', assignee: 'wycliffe_rono', priority: 'Medium', dueDate: '2025-09-01', department: 'ICT' },
+                    { title: 'Conduct Supplier Due Diligence', description: 'Perform due diligence on new potential suppliers for export goods.', assignee: 'victor_otieno', priority: 'High', dueDate: '2025-09-20', department: 'Audit' },
+                ];
+                displayParsedTasks(parsedTasks);
+                showNotification('Workplan parsed successfully! Review and confirm tasks.', 'success');
+            }, 2000); // Simulate 2-second parsing
+        }
+
+        function displayParsedTasks(parsedTasks) {
+            const parsedTasksList = document.getElementById('parsed-tasks-list');
+            parsedTasksList.innerHTML = '';
+            document.getElementById('parsed-tasks-preview').style.display = 'block';
+
+            if (parsedTasks.length === 0) {
+                parsedTasksList.innerHTML = '<p>No tasks could be parsed from the document.</p>';
+                return;
+            }
+
+            parsedTasks.forEach((task, index) => {
+                const taskElement = document.createElement('div');
+                taskElement.classList.add('task-item');
+                taskElement.style.borderLeftColor = var_soft_blue;
+                taskElement.innerHTML = `
+                    <div class="task-header" style="margin-bottom: 8px;">
+                        <span class="task-title" style="font-size: 16px;">${task.title}</span>
+                        <input type="checkbox" checked onchange="toggleParsedTask(${index}, this.checked)"> Select
+                    </div>
+                    <div class="task-meta" style="margin-bottom: 5px; padding-bottom: 5px; border-bottom: none;">
+                        <span><i class="material-icons">person</i> Assignee: <strong>${users[task.assignee] ? users[task.assignee].name : task.assignee}</strong></span>
+                        <span><i class="material-icons">priority_high</i> Priority: <strong>${task.priority}</strong></span>
+                        <span><i class="material-icons">event</i> Due: <strong>${task.dueDate}</strong></span>
+                        <span><i class="material-icons">apartment</i> Department: <strong>${task.department}</strong></span>
+                    </div>
+                    <p style="font-size: 14px;">${task.description || 'No description.'}</p>
+                    <input type="hidden" class="parsed-task-data" data-index="${index}" value="${encodeURIComponent(JSON.stringify(task))}">
+                `;
+                parsedTasksList.appendChild(taskElement);
+            });
+        }
+
+        // To store which tasks are selected from parsed list
+        let tempParsedTasks = [];
+
+        function toggleParsedTask(index, isChecked) {
+            const taskData = JSON.parse(decodeURIComponent(document.querySelector(`.parsed-task-data[data-index="${index}"]`).value));
+            if (isChecked) {
+                tempParsedTasks.push(taskData);
+            } else {
+                tempParsedTasks = tempParsedTasks.filter(t => t.title !== taskData.title); // Simple comparison
+            }
+        }
+
+        function confirmParsedTasks() {
+            const parsedTasksData = Array.from(document.querySelectorAll('.parsed-task-data:checked')).map(input => JSON.parse(decodeURIComponent(input.value)));
+            // Fallback for when checkbox is outside actual input
+            const selectedCheckboxes = Array.from(document.querySelectorAll('#parsed-tasks-list input[type="checkbox"]')).filter(cb => cb.checked);
+            const actualParsedTasks = selectedCheckboxes.map(cb => {
+                const index = cb.closest('.task-item').querySelector('.parsed-task-data').dataset.index;
+                return JSON.parse(decodeURIComponent(document.querySelector(`.parsed-task-data[data-index="${index}"]`).value));
+            });
+
+            if (actualParsedTasks.length === 0) {
+                showNotification('No tasks selected to add.', 'warning');
+                return;
+            }
+
+            actualParsedTasks.forEach(parsedTask => {
+                const newTask = {
+                    id: tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1,
+                    title: parsedTask.title,
+                    description: parsedTask.description,
+                    creator: currentUser,
+                    assignees: [parsedTask.assignee], // Assuming single assignee from parsing
+                    status: 'not-started',
+                    priority: parsedTask.priority,
+                    dueDate: parsedTask.dueDate || null,
+                    department: parsedTask.department || 'General',
+                    createdAt: new Date(),
+                    comments: [],
+                    dependencies: [],
+                    isMilestone: false,
+                    files: []
+                };
+                tasks.push(newTask);
+                notifyDelegatedTask(newTask); // Notify parsed task assignees
+                addWorkflowEvent(currentUser, 'created from workplan', newTask.id, newTask.title, `assigned to ${newTask.assignees.map(a => users[a].name).join(', ')}`);
+            });
+            saveTasks();
+            updateTasksView();
+            updateDashboard();
+            updateAssignedTasksView();
+            updateDependencyOptions();
+            showNotification(`${actualParsedTasks.length} tasks added from workplan!`, 'success');
+            document.getElementById('parsed-tasks-preview').style.display = 'none';
+            document.getElementById('workplan-file').value = ''; // Clear file input
+            showPage('tasks'); // Go to tasks page after adding
+        }
+
+
+        let manualTaskCount = 0;
+        function addManualTaskField() {
+            manualTaskCount++;
+            const container = document.getElementById('manual-task-form-container');
+            const newFieldsetId = `manual-task-fieldset-${manualTaskCount}`;
+            const fieldset = document.createElement('div');
+            fieldset.classList.add('manual-task-item');
+            fieldset.id = newFieldsetId;
+            fieldset.innerHTML = `
+                <button type="button" class="remove-btn" onclick="removeManualTaskField('${newFieldsetId}')">&times;</button>
+                <h4 style="margin-bottom: 15px; color: var(--accent-blue);">Task #${manualTaskCount}</h4>
+                <div class="form-group">
+                    <label class="form-label" for="manual-task-title-${manualTaskCount}">Task Title*</label>
+                    <input type="text" class="form-input" id="manual-task-title-${manualTaskCount}" placeholder="Enter task title..." required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="manual-task-description-${manualTaskCount}">Description</label>
+                    <textarea class="form-textarea" rows="2" id="manual-task-description-${manualTaskCount}" placeholder="Describe the task..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="manual-task-assignees-${manualTaskCount}">Assign To*</label>
+                    <select class="form-select" id="manual-task-assignees-${manualTaskCount}" multiple required onchange="updateAssigneeTags(this.id, 'manual-assignee-tags-${manualTaskCount}')"></select>
+                    <div class="selected-assignees-tags" id="manual-assignee-tags-${manualTaskCount}"></div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label class="form-label" for="manual-task-priority-${manualTaskCount}">Priority</label>
+                        <select class="form-select" id="manual-task-priority-${manualTaskCount}"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="manual-task-due-date-${manualTaskCount}">Due Date</label>
+                        <input type="date" class="form-input" id="manual-task-due-date-${manualTaskCount}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="manual-task-department-${manualTaskCount}">Department</label>
+                    <select class="form-select" id="manual-task-department-${manualTaskCount}"></select>
+                </div>
+            `;
+            container.appendChild(fieldset);
+
+            // Populate select options for this new fieldset
+            populateManualTaskSelects(manualTaskCount);
+        }
+
+        function populateManualTaskSelects(index) {
+            const assigneesSelect = document.getElementById(`manual-task-assignees-${index}`);
+            const prioritySelect = document.getElementById(`manual-task-priority-${index}`);
+            const departmentSelect = document.getElementById(`manual-task-department-${index}`);
+
+            // Populate assignees (similar to updateAssigneeOptions, but for individual select)
+            assigneesSelect.innerHTML = '<option value="" disabled>Select Assignee(s)</option>';
+            const currentUsersCanAssignTo = currentUser ? users[currentUser].canAssignTo : [];
+            Object.values(users).filter(user => currentUsersCanAssignTo.includes(user.id) || user.id === currentUser).forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = `${user.name} (${user.role})`;
+                assigneesSelect.appendChild(option);
+            });
+
+            // Populate priorities
+            const priorities = ['Critical', 'High', 'Medium', 'Low'];
+            prioritySelect.innerHTML = '<option value="Medium">Select Priority</option>';
+            priorities.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p;
+                option.textContent = p;
+                prioritySelect.appendChild(option);
+            });
+
+            // Populate departments
+            const departments = [...new Set(Object.values(users).map(u => u.department))].sort();
+            departmentSelect.innerHTML = '<option value="General">Select Department</option>';
+            departments.forEach(dept => {
+                const option = document.createElement('option');
+                option.value = dept;
+                option.textContent = dept;
+                departmentSelect.appendChild(option);
+            });
+        }
+
+        function removeManualTaskField(id) {
+            document.getElementById(id).remove();
+        }
+
+        function saveManualWorkplan() {
+            const manualTaskForms = document.querySelectorAll('#manual-task-form-container .manual-task-item');
+            if (manualTaskForms.length === 0) {
+                showNotification('No tasks to save.', 'warning');
+                return;
+            }
+
+            let allTasksValid = true;
+            const newTasksBatch = [];
+
+            manualTaskForms.forEach((formElement, index) => {
+                const title = formElement.querySelector(`[id^="manual-task-title-"]`).value.trim();
+                const description = formElement.querySelector(`[id^="manual-task-description-"]`).value.trim();
+                const assignees = Array.from(formElement.querySelector(`[id^="manual-task-assignees-"]`).selectedOptions).map(option => option.value);
+                const priority = formElement.querySelector(`[id^="manual-task-priority-"]`).value;
+                const dueDate = formElement.querySelector(`[id^="manual-task-due-date-"]`).value;
+                const department = formElement.querySelector(`[id^="manual-task-department-"]`).value;
+
+                if (!title || assignees.length === 0) {
+                    showNotification(`Task #${index + 1}: Title and assignee(s) are required.`, 'error');
+                    allTasksValid = false;
+                    return;
+                }
+
+                newTasksBatch.push({
+                    id: tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + (index + 1) : (index + 1),
+                    title,
+                    description,
+                    creator: currentUser,
+                    assignees,
+                    status: 'not-started',
+                    priority: priority !== 'all' ? priority : 'Medium',
+                    dueDate: dueDate || null,
+                    department: department !== 'all' ? department : 'General',
+                    createdAt: new Date(),
+                    comments: [],
+                    dependencies: [],
+                    isMilestone: false,
+                    files: []
+                });
+            });
+
+            if (!allTasksValid) return;
+
+            tasks.push(...newTasksBatch);
+            saveTasks();
+
+            newTasksBatch.forEach(task => {
+                notifyDelegatedTask(task);
+                addWorkflowEvent(currentUser, 'created from manual entry', task.id, task.title, `assigned to ${task.assignees.map(a => users[a].name).join(', ')}`);
+            });
+
+            document.getElementById('manual-task-form-container').innerHTML = ''; // Clear fields
+            manualTaskCount = 0; // Reset count
+            addManualTaskField(); // Add one empty field for next use
+            updateTasksView();
+            updateDashboard();
+            updateAssignedTasksView();
+            updateDependencyOptions();
+            showNotification(`${newTasksBatch.length} tasks added from manual workplan entry!`, 'success');
+            showPage('tasks');
+        }
+
+        // --- Event Listeners and Initial Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTasks();
+            loadWorkflowEvents();
+            applyHighContrastSetting();
+            initializeLogin();
+
+            // Populate sort-by options for My Tasks
+            const sortBySelect = document.getElementById('sort-by');
+            sortBySelect.innerHTML = `
+                <option value="createdAt">Sort by: Creation Date</option>
+                <option value="dueDate">Sort by: Due Date</option>
+                <option value="priority">Sort by: Priority</option>
+            `;
+            // Add initial options for priority and department filters
+            updateDepartmentFilters();
+            updatePriorityFilters();
+        });
+
+    </script>
+</body>
+</html>
