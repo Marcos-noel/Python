@@ -1,0 +1,3220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KEPROBA Task Management System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /* Base styles, variables, and animations (as provided, with minor tweaks) */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-green: #006400; /* Dark Green */
+            --primary-red: #B22222; /* Firebrick Red */
+            --primary-black: #1C2526; /* Almost Black */
+            --primary-white: #F5F6F5; /* Off-white */
+            --accent-blue: #4682B4; /* Steel Blue */
+            --high-contrast-text: #1a1a1a;
+            --high-contrast-bg: #ffffff;
+            --light-gray: #e0e0e0;
+            --medium-gray: #a0a0a0;
+            --dark-gray: #333333;
+            --soft-blue: #e0f2f7; /* For notifications/light backgrounds */
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --error-color: #dc3545;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-blue));
+            min-height: 100vh;
+            color: var(--primary-black);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1600px; /* Slightly wider */
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: fadeInDown 0.8s ease-out;
+        }
+        .logo img { max-height: 70px; } /* Slightly larger logo */
+        .user-info { display: flex; align-items: center; gap: 20px; }
+        .user-switcher {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, var(--primary-green), var(--accent-blue));
+            color: var(--primary-white);
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 100, 0, 0.2);
+        }
+        .user-switcher:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 100, 0, 0.3);
+        }
+        .user-avatar {
+            width: 50px; /* Larger avatar */
+            height: 50px;
+            background: linear-gradient(45deg, var(--primary-green), var(--accent-blue));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-white);
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Navigation */
+        .navigation {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 15px 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: fadeInUp 0.8s ease-out;
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .nav-tab {
+            padding: 12px 25px;
+            background: transparent;
+            border: 2px solid var(--light-gray);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: var(--primary-black);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+        }
+        .nav-tab:hover {
+            border-color: var(--primary-green);
+            color: var(--primary-green);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 100, 0, 0.1);
+        }
+        .nav-tab.active {
+            background: linear-gradient(45deg, var(--primary-green), var(--accent-blue));
+            color: var(--primary-white);
+            border-color: transparent;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 100, 0, 0.4);
+        }
+        .nav-tab i.material-icons { font-size: 20px; } /* Icon sizing */
+
+
+        /* Main Content & Cards */
+        .main-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: fadeIn 1s ease-out;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+        .card-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-black);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 2px solid var(--light-gray);
+            padding-bottom: 15px;
+        }
+        .card-title i.material-icons { font-size: 28px; color: var(--primary-green); }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 25px;
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-blue));
+            border-radius: 18px;
+            color: var(--primary-white);
+            animation: scaleIn 0.5s ease-out;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .stat-item:hover { transform: translateY(-3px); }
+        .stat-number {
+            font-size: 38px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        .stat-label { font-size: 15px; opacity: 0.95; }
+
+        /* Task Items */
+        .task-item {
+            padding: 20px;
+            border-left: 6px solid var(--primary-green);
+            background: var(--primary-white);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            animation: fadeInRight 0.5s ease-out;
+        }
+        .task-item:hover {
+            background: #f9f9f9;
+            border-left-color: var(--accent-blue);
+            transform: translateX(5px);
+        }
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .task-title {
+            font-weight: 700;
+            color: var(--primary-black);
+            font-size: 18px;
+            margin-right: 15px;
+            line-height: 1.3;
+        }
+        .task-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .task-status {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: capitalize;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .status-not-started { background: var(--primary-red); color: var(--primary-white); }
+        .status-in-progress { background: var(--warning-color); color: var(--dark-gray); }
+        .status-completed { background: var(--accent-blue); color: var(--primary-white); }
+        .status-done { background: var(--success-color); color: var(--primary-white); }
+        .task-meta {
+            display: flex;
+            gap: 25px;
+            font-size: 14px;
+            color: var(--dark-gray);
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            border-bottom: 1px dashed var(--light-gray);
+            padding-bottom: 10px;
+        }
+        .task-meta span { display: flex; align-items: center; gap: 5px; }
+        .task-meta i.material-icons { font-size: 18px; color: var(--medium-gray); }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-green), var(--accent-blue));
+            color: var(--primary-white);
+            box-shadow: 0 4px 10px rgba(0, 100, 0, 0.2);
+        }
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--primary-black);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .btn-success { background: var(--success-color); color: var(--primary-white); }
+        .btn-warning { background: var(--warning-color); color: var(--dark-gray); }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+        }
+        .btn i.material-icons { font-size: 18px; }
+
+        /* Forms */
+        .form-group { margin-bottom: 25px; }
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: var(--primary-black);
+            font-size: 15px;
+        }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 18px;
+            border: 2px solid var(--light-gray);
+            border-radius: 12px;
+            font-size: 15px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            background-color: var(--primary-white);
+            color: var(--primary-black);
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(0, 100, 0, 0.2);
+        }
+        .form-textarea { resize: vertical; min-height: 100px; }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: var(--light-gray);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--primary-green));
+            transition: width 0.5s ease-in-out;
+            border-radius: 5px;
+        }
+
+        /* Page Management */
+        .page { display: none; opacity: 0; transition: opacity 0.5s ease-in-out; }
+        .page.active { display: block; opacity: 1; }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 18px 25px;
+            background: var(--success-color);
+            color: var(--primary-white);
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .notification.show { transform: translateX(0); }
+        .notification.error { background: var(--error-color); }
+        .notification.warning { background: var(--warning-color); color: var(--dark-gray); }
+        .notification.info { background: var(--info-color); }
+        .notification i.material-icons { font-size: 24px; }
+
+        /* Comments */
+        .task-comments {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--light-gray);
+        }
+        .comment {
+            background: var(--soft-blue); /* Lighter background for comments */
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .comment-author {
+            font-weight: 700;
+            color: var(--primary-green);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .comment-author .timestamp {
+            font-weight: 400;
+            font-size: 12px;
+            color: var(--medium-gray);
+        }
+        .add-comment { display: flex; gap: 10px; margin-top: 15px; }
+        .comment-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .comment-input:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(70, 130, 180, 0.1); }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .modal-content {
+            background: var(--primary-white);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 95%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+            animation: zoomIn 0.3s ease-out;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--light-gray);
+            padding-bottom: 15px;
+        }
+        .modal-header h2 { font-size: 24px; color: var(--primary-black); }
+        .modal-close {
+            cursor: pointer;
+            font-size: 30px;
+            color: var(--medium-gray);
+            transition: color 0.2s ease;
+        }
+        .modal-close:hover { color: var(--primary-red); }
+
+        /* Hierarchy View */
+        .hierarchy-view {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: fadeIn 1s ease-out;
+        }
+        .hierarchy-level { margin-left: 0; margin-bottom: 20px; }
+        .hierarchy-level.level-1 { margin-left: 30px; }
+        .hierarchy-level.level-2 { margin-left: 60px; }
+        .hierarchy-level.level-3 { margin-left: 90px; }
+        .hierarchy-level.level-4 { margin-left: 120px; }
+        .hierarchy-level.level-5 { margin-left: 150px; }
+        .hierarchy-item {
+            background: var(--primary-white);
+            padding: 18px 25px;
+            border-radius: 15px;
+            border-left: 6px solid var(--accent-blue);
+            margin-bottom: 15px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .hierarchy-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        }
+        .hierarchy-item::before {
+            content: "";
+            position: absolute;
+            left: -35px; /* Adjust based on margin-left */
+            top: 50%;
+            width: 30px;
+            height: 2px;
+            background: var(--medium-gray);
+            transform: translateY(-50%);
+        }
+        .hierarchy-item:first-child::before { display: none; }
+        .role-indicator {
+            display: inline-block;
+            padding: 5px 12px;
+            background: var(--primary-green);
+            color: var(--primary-white);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .hierarchy-user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-white);
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* Tooltips */
+        [data-tooltip] { position: relative; }
+        [data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 10px); /* Position above */
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-black);
+            color: var(--primary-white);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            white-space: nowrap;
+            z-index: 10;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        [data-tooltip]:hover::before { /* Arrow for tooltip */
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: var(--primary-black) transparent transparent transparent;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 10;
+        }
+        [data-tooltip]:hover::after,
+        [data-tooltip]:hover::before {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* High Contrast Mode */
+        [high-contrast] {
+            --primary-green: #000000;
+            --primary-red: #ff0000;
+            --primary-black: #ffffff;
+            --primary-white: #000000;
+            --accent-blue: #0000ff;
+            --light-gray: #333333;
+            --medium-gray: #aaaaaa;
+            --dark-gray: #cccccc;
+            --soft-blue: #222222;
+            --success-color: #00ff00;
+            --warning-color: #ffff00;
+            --info-color: #00ffff;
+            --error-color: #ff0000;
+            background: var(--primary-black) !important;
+            color: var(--primary-black);
+        }
+        [high-contrast] body { background: var(--primary-black) !important; color: var(--primary-black); }
+        [high-contrast] .header,
+        [high-contrast] .navigation,
+        [high-contrast] .dashboard-card,
+        [high-contrast] .task-item,
+        [high-contrast] .modal-content,
+        [high-contrast] .hierarchy-view,
+        [high-contrast] .hierarchy-item,
+        [high-contrast] .comment {
+            background: var(--primary-black) !important;
+            color: var(--primary-black) !important;
+            border: 2px solid var(--primary-black) !important;
+            box-shadow: none !important;
+        }
+        [high-contrast] .nav-tab {
+            border-color: var(--primary-black) !important;
+            color: var(--primary-black) !important;
+        }
+        [high-contrast] .nav-tab.active {
+            background: var(--primary-black) !important;
+            color: var(--primary-white) !important;
+            border-color: var(--primary-white) !important;
+        }
+        [high-contrast] .btn {
+            background: var(--primary-black) !important;
+            color: var(--primary-black) !important;
+            border: 2px solid var(--primary-black) !important;
+        }
+        [high-contrast] .btn-primary, [high-contrast] .btn-success { background: var(--primary-black) !important; border-color: var(--primary-black) !important; }
+        [high-contrast] .btn-secondary, [high-contrast] .btn-warning { background: var(--primary-black) !important; border-color: var(--primary-black) !important; }
+        [high-contrast] .form-input, [high-contrast] .form-select, [high-contrast] .form-textarea {
+            background: var(--primary-black) !important;
+            color: var(--primary-black) !important;
+            border-color: var(--primary-black) !important;
+        }
+        [high-contrast] .stat-item {
+            background: var(--primary-black) !important;
+            border: 2px solid var(--primary-black) !important;
+            color: var(--primary-black) !important;
+        }
+        [high-contrast] .task-item { border-left-color: var(--primary-black) !important; }
+        [high-contrast] .hierarchy-item { border-left-color: var(--primary-black) !important; }
+
+        /* File Upload & Preview */
+        .file-preview {
+            max-width: 250px;
+            max-height: 250px;
+            margin-top: 15px;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .file-list { margin-top: 15px; border-top: 1px dashed var(--light-gray); padding-top: 15px; }
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--dark-gray);
+        }
+        .file-item a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .file-item a:hover { text-decoration: underline; color: var(--primary-green); }
+        .file-item i.material-icons { font-size: 18px; color: var(--medium-gray); }
+
+        /* Charts */
+        .chart-container {
+            position: relative;
+            height: 350px; /* Increased height for better visibility */
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--primary-white);
+            border-radius: 20px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Filter Group */
+        .filter-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            padding: 15px;
+            background: var(--soft-blue);
+            border-radius: 15px;
+            box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.05);
+        }
+        .filter-group .form-input, .filter-group .form-select {
+            flex: 1;
+            min-width: 150px;
+            border-radius: 8px;
+        }
+
+        /* Task Assignment (for multiple assignees) */
+        .assign-multiple-container {
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            padding: 15px;
+            background: var(--soft-blue);
+            margin-top: 10px;
+        }
+        .selected-assignees-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .assignee-tag {
+            background: var(--accent-blue);
+            color: var(--primary-white);
+            padding: 6px 10px;
+            border-radius: 15px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .assignee-tag .remove-tag {
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 1;
+            margin-left: 5px;
+            color: rgba(255, 255, 255, 0.8);
+            transition: color 0.2s ease;
+        }
+        .assignee-tag .remove-tag:hover { color: var(--primary-white); }
+        .full-width { grid-column: 1 / -1; }
+
+        /* Workflow Trail */
+        .workflow-trail {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--primary-white);
+            border-radius: 20px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .workflow-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--light-gray);
+            position: relative;
+        }
+        .workflow-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .workflow-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--primary-green);
+            color: var(--primary-white);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            margin-right: 15px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .workflow-content strong { color: var(--primary-green); }
+        .workflow-content span { font-size: 13px; color: var(--medium-gray); margin-left: 10px; }
+
+        /* Workplan Upload/Manual Entry */
+        .workplan-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--light-gray);
+        }
+        .workplan-option {
+            border: 2px dashed var(--light-gray);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: var(--soft-blue);
+        }
+        .workplan-option:hover {
+            border-color: var(--primary-green);
+            background-color: #eaf8fc;
+            box-shadow: 0 4px 15px rgba(0, 100, 0, 0.1);
+        }
+        .workplan-option.selected {
+            border-color: var(--primary-green);
+            background-color: #dcf2f7;
+            box-shadow: 0 4px 20px rgba(0, 100, 0, 0.2);
+        }
+        .workplan-option i.material-icons { font-size: 48px; color: var(--accent-blue); margin-bottom: 10px; }
+        .workplan-option h3 { color: var(--primary-green); margin-bottom: 5px; }
+        #workplan-manual-entry { margin-top: 20px; display: none; }
+        .manual-task-item {
+            background: var(--primary-white);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--light-gray);
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .manual-task-item .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary-red);
+            color: var(--primary-white);
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .manual-task-item .remove-btn:hover { background: #cc0000; }
+
+        /* Media Queries */
+        @media (max-width: 1024px) {
+            .main-content { grid-template-columns: 1fr; }
+            .hierarchy-level.level-1 { margin-left: 20px; }
+            .hierarchy-level.level-2 { margin-left: 40px; }
+            .hierarchy-level.level-3 { margin-left: 60px; }
+            .hierarchy-level.level-4 { margin-left: 80px; }
+            .hierarchy-level.level-5 { margin-left: 100px; }
+            .hierarchy-item::before { left: -20px; width: 15px; }
+        }
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .header { flex-direction: column; gap: 15px; text-align: center; }
+            .nav-tabs { justify-content: flex-start; }
+            .main-content { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .task-actions { flex-direction: column; gap: 8px; }
+            .form-group { margin-bottom: 18px; }
+            .filter-group { flex-direction: column; }
+            .modal-content { padding: 20px; }
+        }
+        @media (max-width: 480px) {
+            .container { padding: 10px; }
+            .form-input, .form-select, .form-textarea { font-size: 16px; padding: 10px 15px; }
+            .btn { padding: 10px 18px; font-size: 13px; }
+            .task-meta { flex-direction: column; gap: 5px; font-size: 13px; }
+            .card-title { font-size: 20px; }
+            .stat-number { font-size: 30px; }
+            .stat-label { font-size: 13px; }
+            .user-avatar { width: 40px; height: 40px; font-size: 16px; }
+            .user-switcher { padding: 8px 15px; font-size: 13px; }
+            .nav-tab { padding: 10px 18px; font-size: 13px; }
+        }
+        /* Keyframe Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInRight { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo"><img src="assets/image/logo.svg" alt="KEPROBA Logo" aria-label="KEPROBA Logo"></div>
+            <div class="user-info">
+                <button class="user-switcher" onclick="switchUser()" data-tooltip="Switch to another user"><i class="material-icons">person_swap</i> Switch User</button>
+                <div>
+                    <div style="font-weight: 600;" id="current-user-name"></div>
+                    <div style="font-size: 14px; color: var(--primary-black);" id="current-user-role"></div>
+                </div>
+                <div class="user-avatar" id="current-user-avatar"></div>
+            </div>
+        </header>
+        <nav class="navigation">
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showPage('dashboard')" role="tab" aria-selected="true" aria-controls="dashboard" data-tooltip="View your task overview"><i class="material-icons">dashboard</i> Dashboard</button>
+                <button class="nav-tab" onclick="showPage('tasks')" role="tab" aria-selected="false" aria-controls="tasks" data-tooltip="View tasks you created"><i class="material-icons">check_circle</i> My Tasks</button>
+                <button class="nav-tab" onclick="showPage('create')" role="tab" aria-selected="false" aria-controls="create" data-tooltip="Create a new task"><i class="material-icons">add_task</i> Create Task</button>
+                <button class="nav-tab" onclick="showPage('assigned')" role="tab" aria-selected="false" aria-controls="assigned" data-tooltip="View tasks assigned to you"><i class="material-icons">assignment_ind</i> Assigned to Me</button>
+                <button class="nav-tab" onclick="showPage('hierarchy')" role="tab" aria-selected="false" aria-controls="hierarchy" data-tooltip="View organizational hierarchy"><i class="material-icons">apartment</i> Organization</button>
+                <button class="nav-tab" onclick="showPage('performance')" role="tab" aria-selected="false" aria-controls="performance" data-tooltip="View performance metrics"><i class="material-icons">analytics</i> Performance</button>
+                <button class="nav-tab" onclick="showPage('help')" role="tab" aria-selected="false" aria-controls="help" data-tooltip="View tutorials and FAQs"><i class="material-icons">help</i> Help</button>
+                <button class="btn btn-secondary" onclick="toggleHighContrast()" data-tooltip="Toggle high contrast mode"><i class="material-icons">contrast</i> Toggle High Contrast</button>
+            </div>
+        </nav>
+
+        <div id="login" class="page active">
+            <div class="dashboard-card full-width">
+                <h2 class="card-title"><i class="material-icons">lock</i> Secure Login</h2>
+                <form id="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="login-user">Select Your User Profile:</label>
+                        <select class="form-select" id="login-user" required aria-required="true"></select>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="material-icons">login</i> Login to KEPROBA System</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="dashboard" class="page">
+            <div class="main-content">
+                <div class="dashboard-card">
+                    <h2 class="card-title"><i class="material-icons">track_changes</i> My Task Overview</h2>
+                    <div class="filter-group">
+                        <select class="form-select" id="dashboard-filter" onchange="updateDashboard()" aria-label="Filter dashboard by status">
+                            <option value="all">All Statuses</option>
+                            <option value="not-started">Not Started</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                            <option value="done">Done</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                    </div>
+                    <div class="stats-grid" id="dashboard-stats"></div>
+                </div>
+
+                <div class="dashboard-card">
+                    <h2 class="card-title"><i class="material-icons">account_tree</i> Departmental Workflow Overview</h2>
+                    <div class="filter-group">
+                        <select class="form-select" id="departmental-dashboard-filter" onchange="updateDepartmentalDashboard()" aria-label="Filter departmental dashboard by status">
+                            <option value="all">All Statuses</option>
+                            <option value="not-started">Not Started</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                            <option value="done">Done</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                    </div>
+                    <div id="departmental-stats-grid" class="stats-grid"></div>
+                    <div class="chart-container">
+                        <canvas id="departmentalTaskStatusChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="dashboard-card full-width">
+                    <h2 class="card-title"><i class="material-icons">pie_chart</i> Overall Task Status Distribution</h2>
+                    <div class="chart-container">
+                        <canvas id="overallTaskStatusChart"></canvas>
+                    </div>
+                </div>
+
+
+                <div class="dashboard-card">
+                    <h2 class="card-title"><i class="material-icons">history</i> Recent Activities & Workflow Trail</h2>
+                    <div id="recent-activities"></div>
+                    <div class="workflow-trail" id="workflow-trail-display">
+                        <h3><i class="material-icons">stream</i> Workflow History</h3>
+                        <div id="workflow-events"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tasks" class="page">
+            <div class="dashboard-card full-width">
+                <h2 class="card-title"><i class="material-icons">check_circle_outline</i> My Created & Delegated Tasks</h2>
+                <div class="filter-group">
+                    <input type="text" class="form-input" id="task-search" placeholder="Search tasks by title or description..." oninput="updateTasksView()" aria-label="Search my tasks">
+                    <select class="form-select" id="tasks-filter" onchange="updateTasksView()" aria-label="Filter my tasks by status">
+                        <option value="all">All Statuses</option>
+                        <option value="not-started">Not Started</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="done">Done</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                    <select class="form-select" id="department-filter" onchange="updateTasksView()" aria-label="Filter my tasks by department"></select>
+                    <select class="form-select" id="priority-filter" onchange="updateTasksView()" aria-label="Filter my tasks by priority"></select>
+                    <select class="form-select" id="sort-by" onchange="updateTasksView()" aria-label="Sort my tasks by"></select>
+                </div>
+                <div id="my-tasks-list"></div>
+            </div>
+        </div>
+
+        <div id="assigned" class="page">
+            <div class="dashboard-card full-width">
+                <h2 class="card-title"><i class="material-icons">assignment_turned_in</i> Tasks Assigned to Me</h2>
+                <div class="filter-group">
+                    <input type="text" class="form-input" id="assigned-task-search" placeholder="Search assigned tasks..." oninput="updateAssignedTasksView()" aria-label="Search assigned tasks">
+                    <select class="form-select" id="assigned-filter" onchange="updateAssignedTasksView()" aria-label="Filter assigned tasks by status">
+                        <option value="all">All Statuses</option>
+                        <option value="not-started">Not Started</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="done">Done</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                    <select class="form-select" id="assigned-department-filter" onchange="updateAssignedTasksView()" aria-label="Filter assigned tasks by department"></select>
+                    <select class="form-select" id="assigned-priority-filter" onchange="updateAssignedTasksView()" aria-label="Filter assigned tasks by priority"></select>
+                </div>
+                <div id="assigned-tasks-notice"></div>
+                <div id="assigned-tasks-list"></div>
+            </div>
+        </div>
+
+        <div id="create" class="page">
+            <div class="dashboard-card full-width">
+                <h2 class="card-title"><i class="material-icons">add_circle</i> Create New Task or Workplan Item</h2>
+                <div class="workplan-section">
+                    <label class="form-label">How would you like to create tasks?</label>
+                    <div style="display: flex; gap: 20px;">
+                        <div class="workplan-option" id="option-upload" onclick="selectWorkplanOption('upload')">
+                            <i class="material-icons">cloud_upload</i>
+                            <h3>Upload Workplan Document</h3>
+                            <p>Upload your official KEPROBA workplan document (e.g., PDF, Excel).</p>
+                        </div>
+                        <div class="workplan-option" id="option-manual" onclick="selectWorkplanOption('manual')">
+                            <i class="material-icons">edit_note</i>
+                            <h3>Manually Enter Tasks</h3>
+                            <p>Enter task details one by one with automatic assignee suggestions.</p>
+                        </div>
+                    </div>
+
+                    <div id="workplan-upload-section" style="display: none; margin-top: 20px;">
+                        <div class="form-group">
+                            <label class="form-label" for="workplan-file">Upload Workplan File:</label>
+                            <input type="file" class="form-input" id="workplan-file" accept=".pdf,.docx,.xlsx" onchange="handleWorkplanUpload()">
+                            <small class="form-text">Supported formats: PDF, DOCX, XLSX. System will attempt to parse tasks.</small>
+                        </div>
+                        <div id="parsed-tasks-preview" style="margin-top: 20px; border-top: 1px dashed var(--light-gray); padding-top: 15px; display: none;">
+                            <h3 class="card-title">Parsed Tasks from Workplan:</h3>
+                            <div id="parsed-tasks-list"></div>
+                            <button type="button" class="btn btn-success" onclick="confirmParsedTasks()" style="margin-top: 20px;"><i class="material-icons">check</i> Confirm & Add All Parsed Tasks</button>
+                        </div>
+                    </div>
+
+                    <form id="task-form" onsubmit="createTask(event)" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label" for="task-title">Task Title*</label>
+                            <input type="text" class="form-input" id="task-title" placeholder="e.g., Prepare Q3 Financial Report" required aria-required="true">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="task-description">Task Description</label>
+                            <textarea class="form-textarea" id="task-description" placeholder="Provide details about the task..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="task-due-date">Due Date*</label>
+                            <input type="date" class="form-input" id="task-due-date" required aria-required="true">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="task-priority">Priority*</label>
+                            <select class="form-select" id="task-priority" required aria-required="true">
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                                <option value="Urgent">Urgent</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="task-assignees">Assign Task To* (Select multiple users)</label>
+                            <div class="assign-multiple-container">
+                                <select class="form-select" id="task-assignees" multiple required aria-required="true" onchange="updateSelectedAssignees()">
+                                    </select>
+                                <div class="selected-assignees-tags" id="selected-assignees-tags"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="task-department">Associated Department*</label>
+                            <select class="form-select" id="task-department" required aria-required="true">
+                                </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="task-status">Initial Status</label>
+                            <select class="form-select" id="task-status" aria-label="Initial task status">
+                                <option value="Not Started">Not Started</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Done">Done</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="task-dependencies">Dependencies (Optional)</label>
+                            <select class="form-select" id="task-dependencies" multiple aria-label="Task dependencies">
+                                </select>
+                            <small class="form-text">Select tasks that must be completed before this one can start.</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="task-attachments">Attachments (Optional)</label>
+                            <input type="file" class="form-input" id="task-attachments" multiple onchange="handleFileSelect(event)">
+                            <div id="file-previews"></div>
+                            <div id="file-list-display" class="file-list"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="material-icons">save</i> Create Task</button>
+                    </form>
+
+                    <div id="manual-task-form-container" style="display: none; margin-top: 20px;">
+                        </div>
+                    <button type="button" class="btn btn-secondary" id="add-manual-task-btn" onclick="addManualTaskField()" style="display: none; margin-top: 10px;"><i class="material-icons">add</i> Add Another Task</button>
+                    <button type="button" class="btn btn-success" id="save-manual-tasks-btn" onclick="saveManualTasks()" style="display: none; margin-top: 20px;"><i class="material-icons">save</i> Save All Manual Tasks</button>
+
+                </div>
+            </div>
+        </div>
+
+        <div id="assigned" class="page">
+            <div class="dashboard-card full-width">
+                <h2 class="card-title"><i class="material-icons">assignment_turned_in</i> Tasks Assigned to Me</h2>
+                <div class="filter-group">
+                    <input type="text" class="form-input" id="assigned-task-search" placeholder="Search assigned tasks..." oninput="updateAssignedTasksView()" aria-label="Search assigned tasks">
+                    <select class="form-select" id="assigned-filter" onchange="updateAssignedTasksView()" aria-label="Filter assigned tasks by status">
+                        <option value="all">All Statuses</option>
+                        <option value="not-started">Not Started</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="done">Done</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                    <select class="form-select" id="assigned-department-filter" onchange="updateAssignedTasksView()" aria-label="Filter assigned tasks by department"></select>
+                    <select class="form-select" id="assigned-priority-filter" onchange="updateAssignedTasksView()" aria-label="Filter assigned tasks by priority"></select>
+                </div>
+                <div id="assigned-tasks-notice"></div>
+                <div id="assigned-tasks-list"></div>
+            </div>
+        </div>
+
+        <div id="hierarchy" class="page">
+            <div class="dashboard-card full-width">
+                <h2 class="card-title"><i class="material-icons">apartment</i> Organizational Hierarchy</h2>
+                <div class="hierarchy-view" id="hierarchy-tree">
+                    </div>
+            </div>
+        </div>
+
+        <div id="performance" class="page">
+            <div class="main-content">
+                <div class="dashboard-card full-width">
+                    <h2 class="card-title"><i class="material-icons">bar_chart</i> Team Performance Metrics</h2>
+                    <div class="filter-group">
+                        <select class="form-select" id="performance-department-filter" onchange="updatePerformanceDashboard()" aria-label="Filter performance by department">
+                            <option value="all">All Departments</option>
+                        </select>
+                        <select class="form-select" id="performance-user-filter" onchange="updatePerformanceDashboard()" aria-label="Filter performance by user">
+                            <option value="all">All Users</option>
+                        </select>
+                    </div>
+                    <div class="stats-grid" id="performance-stats">
+                        </div>
+                    <div class="chart-container">
+                        <canvas id="tasksCompletedByDepartmentChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="taskCompletionTimeChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="userTaskDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="help" class="page">
+            <div class="dashboard-card full-width">
+                <h2 class="card-title"><i class="material-icons">help_outline</i> Help & Support</h2>
+                <div class="help-section">
+                    <h3>Getting Started</h3>
+                    <p>Welcome to the KEPROBA Task Management System! This system helps you organize, track, and manage your tasks efficiently. Here are some quick tips:</p>
+                    <ul>
+                        <li>Use the "Create Task" tab to add new tasks.</li>
+                        <li>Monitor your progress in the "My Tasks" and "Assigned to Me" sections.</li>
+                        <li>The "Dashboard" provides an overview of all tasks.</li>
+                    </ul>
+                    <h3>Frequently Asked Questions (FAQs)</h3>
+                    <h4>Q: How do I create a new task?</h4>
+                    <p>A: Navigate to the "Create Task" tab. You can either manually enter task details or upload a workplan document for automatic parsing. Fill in the required fields such as Title, Due Date, Priority, and Assignees, then click "Create Task."</p>
+                    <h4>Q: How can I track my assigned tasks?</h4>
+                    <p>A: Go to the "Assigned to Me" tab. Here, you'll see a list of all tasks that have been delegated to you. You can filter and search through them based on status, department, or priority.</p>
+                    <h4>Q: What do the different task statuses mean?</h4>
+                    <ul>
+                        <li><strong>Not Started:</strong> The task has been created but no work has begun.</li>
+                        <li><strong>In Progress:</strong> Work on the task has commenced.</li>
+                        <li><strong>Completed:</strong> The primary work on the task is finished, awaiting final review or approval.</li>
+                        <li><strong>Done:</strong> The task is fully finished and approved.</li>
+                        <li><strong>Overdue:</strong> The task's due date has passed, and it has not been marked as Completed or Done.</li>
+                    </ul>
+                    <h4>Q: Can I attach files to a task?</h4>
+                    <p>A: Yes, when creating or editing a task, you can use the "Attachments" field to upload relevant documents, images, or other files. You can upload multiple files if needed.</p>
+                    <h4>Q: How does the workflow trail work?</h4>
+                    <p>A: The workflow trail on the Dashboard's "Recent Activities" card logs significant events related to tasks, such as creation, status changes, and comments. This provides an audit trail and keeps everyone informed of progress.</p>
+                    <h4>Q: What is "High Contrast Mode"?</h4>
+                    <p>A: High Contrast Mode is an accessibility feature that changes the color scheme of the interface to provide a starker contrast between text and background, making it easier for users with visual impairments to read and navigate the system.</p>
+                    <h3>Tutorial Videos</h3>
+                    <p>Watch our video tutorials for a more in-depth guide:</p>
+                    <ul>
+                        <li><a href="#" onclick="showNotification('Video tutorial feature coming soon!', 'info'); return false;">Creating Your First Task</a></li>
+                        <li><a href="#" onclick="showNotification('Video tutorial feature coming soon!', 'info'); return false;">Managing Your Assigned Tasks</a></li>
+                        <li><a href="#" onclick="showNotification('Video tutorial feature coming soon!', 'info'); return false;">Understanding Your Dashboard</a></li>
+                    </ul>
+                    <p style="margin-top: 20px;">If you have further questions, please contact IT support.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="taskDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-task-title">Task Details</h2>
+                <span class="modal-close" onclick="closeModal('taskDetailModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p><strong>Description:</strong> <span id="modal-task-description"></span></p>
+                <p><strong>Status:</strong> <span id="modal-task-status" class="task-status"></span></p>
+                <p><strong>Due Date:</strong> <span id="modal-task-due-date"></span></p>
+                <p><strong>Priority:</strong> <span id="modal-task-priority"></span></p>
+                <p><strong>Created By:</strong> <span id="modal-task-creator"></span></p>
+                <p><strong>Assigned To:</strong> <span id="modal-task-assignees"></span></p>
+                <p><strong>Department:</strong> <span id="modal-task-department"></span></p>
+                <p><strong>Dependencies:</strong> <span id="modal-task-dependencies"></span></p>
+                <p><strong>Attachments:</strong> <div id="modal-task-attachments" class="file-list"></div></p>
+
+                <div class="task-actions" style="justify-content: flex-start;">
+                    <button class="btn btn-primary" onclick="openEditTaskModal()"><i class="material-icons">edit</i> Edit Task</button>
+                    <button class="btn btn-warning" onclick="changeTaskStatusPrompt()"><i class="material-icons">published_with_changes</i> Change Status</button>
+                    <button class="btn btn-danger" onclick="deleteTaskPrompt()"><i class="material-icons">delete</i> Delete Task</button>
+                </div>
+
+                <div class="task-comments">
+                    <h4>Comments:</h4>
+                    <div id="modal-comments-list"></div>
+                    <div class="add-comment">
+                        <input type="text" class="comment-input" id="new-comment-input" placeholder="Add a new comment...">
+                        <button class="btn btn-primary" onclick="addCommentToTask()"><i class="material-icons">send</i> Post</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="editTaskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Task</h2>
+                <span class="modal-close" onclick="closeModal('editTaskModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="edit-task-form" onsubmit="saveEditedTask(event)">
+                    <input type="hidden" id="edit-task-id">
+                    <div class="form-group">
+                        <label class="form-label" for="edit-task-title">Task Title*</label>
+                        <input type="text" class="form-input" id="edit-task-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-task-description">Task Description</label>
+                        <textarea class="form-textarea" id="edit-task-description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-task-due-date">Due Date*</label>
+                        <input type="date" class="form-input" id="edit-task-due-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-task-priority">Priority*</label>
+                        <select class="form-select" id="edit-task-priority" required>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                            <option value="Urgent">Urgent</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-task-assignees">Assign Task To* (Select multiple users)</label>
+                        <div class="assign-multiple-container">
+                            <select class="form-select" id="edit-task-assignees" multiple required onchange="updateEditSelectedAssignees()">
+                                </select>
+                            <div class="selected-assignees-tags" id="edit-selected-assignees-tags"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-task-department">Associated Department*</label>
+                        <select class="form-select" id="edit-task-department" required>
+                            </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-task-attachments">Current Attachments</label>
+                        <div id="edit-file-list-display" class="file-list"></div>
+                        <label class="form-label" for="add-new-attachments" style="margin-top: 15px;">Add New Attachments (Optional)</label>
+                        <input type="file" class="form-input" id="add-new-attachments" multiple onchange="handleFileSelectEdit(event)">
+                        <div id="new-file-previews-edit"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="material-icons">save</i> Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- Data Storage ---
+        let currentUser = null;
+        
+        let users = [
+            { id: 'usr1', name: 'Alice Smith', role: 'Department Head - Sales', department: 'Sales', avatar: 'AS' },
+            { id: 'usr2', name: 'Bob Johnson', role: 'Team Lead - Sales', department: 'Sales', avatar: 'BJ' },
+            { id: 'usr3', name: 'Charlie Brown', role: 'Sales Representative', department: 'Sales', avatar: 'CB' },
+            { id: 'usr4', name: 'Diana Prince', role: 'Department Head - Marketing', department: 'Marketing', avatar: 'DP' },
+            { id: 'usr5', name: 'Eve Adams', role: 'Team Lead - Marketing', department: 'Marketing', avatar: 'EA' },
+            { id: 'usr6', name: 'Frank White', role: 'Marketing Specialist', department: 'Marketing', avatar: 'FW' },
+            { id: 'usr7', name: 'Grace Lee', role: 'Department Head - HR', department: 'Human Resources', avatar: 'GL' },
+            { id: 'usr8', name: 'Henry King', role: 'HR Generalist', department: 'Human Resources', avatar: 'HK' },
+            { id: 'usr9', name: 'Ivy Green', role: 'Department Head - IT', department: 'IT', avatar: 'IG' },
+            { id: 'usr10', name: 'Jack Black', role: 'IT Support', department: 'IT', avatar: 'JB' }
+        ];
+
+        let tasks = [
+            {
+                id: 'T001', title: 'Develop Q3 Sales Strategy', description: 'Outline new sales initiatives and targets for the third quarter.',
+                status: 'In Progress', dueDate: '2025-08-15', priority: 'High', creator: 'usr1', assignees: ['usr2'],
+                department: 'Sales', comments: [], attachments: [], createdAt: '2025-07-20T10:00:00Z', workflow: ['created', 'assigned']
+            },
+            {
+                id: 'T002', title: 'Review Marketing Campaign Performance', description: 'Analyze data from recent digital marketing campaigns.',
+                status: 'Not Started', dueDate: '2025-08-20', priority: 'Medium', creator: 'usr4', assignees: ['usr5'],
+                department: 'Marketing', comments: [], attachments: [], createdAt: '2025-07-22T11:30:00Z', workflow: ['created', 'assigned']
+            },
+            {
+                id: 'T003', title: 'Onboard New HR Assistant', description: 'Complete all paperwork and orientation for the new hire.',
+                status: 'Completed', dueDate: '2025-07-30', priority: 'High', creator: 'usr7', assignees: ['usr8'],
+                department: 'Human Resources', comments: [], attachments: [], createdAt: '2025-07-25T09:00:00Z', workflow: ['created', 'assigned', 'status-change:In Progress', 'status-change:Completed']
+            },
+            {
+                id: 'T004', title: 'IT System Upgrade Planning', description: 'Plan the upgrade path for internal IT infrastructure.',
+                status: 'In Progress', dueDate: '2025-09-01', priority: 'Urgent', creator: 'usr9', assignees: ['usr10'],
+                department: 'IT', comments: [], attachments: [], createdAt: '2025-07-28T14:00:00Z', workflow: ['created', 'assigned']
+            },
+            {
+                id: 'T005', title: 'Prepare Sales Training Materials', description: 'Create modules for product knowledge and selling techniques.',
+                status: 'Not Started', dueDate: '2025-08-25', priority: 'Medium', creator: 'usr2', assignees: ['usr3'],
+                department: 'Sales', comments: [], attachments: [], createdAt: '2025-07-29T10:00:00Z', workflow: ['created', 'assigned']
+            },
+            {
+                id: 'T006', title: 'Website Content Update', description: 'Update product pages and blog section with new content.',
+                status: 'In Progress', dueDate: '2025-08-18', priority: 'Low', creator: 'usr5', assignees: ['usr6'],
+                department: 'Marketing', comments: [], attachments: [], createdAt: '2025-07-30T13:00:00Z', workflow: ['created', 'assigned']
+            },
+            {
+                id: 'T007', title: 'Recruit Senior Software Engineer', description: 'Source and interview candidates for the open engineer position.',
+                status: 'In Progress', dueDate: '2025-09-10', priority: 'High', creator: 'usr7', assignees: ['usr8'],
+                department: 'Human Resources', comments: [], attachments: [], createdAt: '2025-07-31T09:30:00Z', workflow: ['created', 'assigned']
+            },
+            {
+                id: 'T008', title: 'Network Security Audit', description: 'Perform a comprehensive audit of current network security protocols.',
+                status: 'Not Started', dueDate: '2025-09-05', priority: 'Urgent', creator: 'usr9', assignees: ['usr10'],
+                department: 'IT', comments: [], attachments: [], createdAt: '2025-08-01T11:00:00Z', workflow: ['created', 'assigned']
+            }
+        ];
+
+        let workflowEvents = []; // Stores significant workflow events for the trail
+
+        let currentOpenTaskId = null; // To keep track of the task opened in the modal
+        let manualTaskCount = 0; // Counter for manual task entry fields
+        let parsedWorkplanFiles = {}; // Stores parsed tasks from uploaded workplans
+
+        let overallTaskStatusChartInstance = null;
+        let departmentalTaskStatusChartInstance = null;
+        let tasksCompletedByDepartmentChartInstance = null;
+        let taskCompletionTimeChartInstance = null;
+        let userTaskDistributionChartInstance = null;
+
+
+        // --- Utility Functions ---
+        function generateId(prefix = 'T') {
+            return prefix + Math.random().toString(36).substr(2, 9).toUpperCase();
+        }
+
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+
+        function timeAgo(dateString) {
+            const now = new Date();
+            const past = new Date(dateString);
+            const seconds = Math.floor((now - past) / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (seconds < 60) return `${seconds} seconds ago`;
+            if (minutes < 60) return `${minutes} minutes ago`;
+            if (hours < 24) return `${hours} hours ago`;
+            return `${days} days ago`;
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            const icon = type === 'success' ? 'check_circle' :
+                         type === 'error' ? 'error' :
+                         type === 'warning' ? 'warning' : 'info';
+            notification.innerHTML = `<i class="material-icons">${icon}</i> ${message}`;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 50);
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+                notification.addEventListener('transitionend', () => notification.remove());
+            }, 3000);
+        }
+
+        // --- User Management ---
+        function initializeLogin() {
+            const loginSelect = document.getElementById('login-user');
+            loginSelect.innerHTML = users.map(user => `<option value="${user.id}">${user.name} (${user.role})</option>`).join('');
+            if (users.length > 0) {
+                currentUser = users[0]; // Default to the first user
+                updateCurrentUserDisplay();
+            }
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const loginUserId = document.getElementById('login-user').value;
+            currentUser = users.find(user => user.id === loginUserId);
+            updateCurrentUserDisplay();
+            showPage('dashboard');
+            showNotification(`Welcome, ${currentUser.name}!`, 'success');
+        }
+
+        function switchUser() {
+            showPage('login');
+            showNotification('Please select a user to switch.', 'info');
+        }
+
+        function updateCurrentUserDisplay() {
+            if (currentUser) {
+                document.getElementById('current-user-name').textContent = currentUser.name;
+                document.getElementById('current-user-role').textContent = currentUser.role;
+                document.getElementById('current-user-avatar').textContent = currentUser.avatar;
+            }
+        }
+
+        // --- Page Navigation ---
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+                tab.setAttribute('aria-selected', 'false');
+            });
+            const activeTab = document.querySelector(`.nav-tab[onclick="showPage('${pageId}')"]`);
+            if (activeTab) {
+                activeTab.classList.add('active');
+                activeTab.setAttribute('aria-selected', 'true');
+            }
+
+            // Update content based on the page
+            if (pageId === 'dashboard') {
+                updateDashboard();
+                updateDepartmentalDashboard();
+                renderOverallTaskStatusChart();
+            } else if (pageId === 'tasks') {
+                updateTasksView();
+            } else if (pageId === 'assigned') {
+                updateAssignedTasksView();
+            } else if (pageId === 'create') {
+                populateAssigneesSelect();
+                populateDepartmentSelect('task-department');
+                updateDependencyOptions();
+                addManualTaskField(); // Ensure at least one field is present
+            } else if (pageId === 'hierarchy') {
+                renderHierarchy();
+            } else if (pageId === 'performance') {
+                updatePerformanceDashboard();
+            }
+        }
+
+        // --- Local Storage Functions ---
+        function saveTasks() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        function loadTasks() {
+            const savedTasks = localStorage.getItem('tasks');
+            if (savedTasks) {
+                tasks = JSON.parse(savedTasks);
+            }
+        }
+
+        function saveWorkflowEvents() {
+            localStorage.setItem('workflowEvents', JSON.stringify(workflowEvents));
+        }
+
+        function loadWorkflowEvents() {
+            const savedWorkflowEvents = localStorage.getItem('workflowEvents');
+            if (savedWorkflowEvents) {
+                workflowEvents = JSON.parse(savedWorkflowEvents);
+            }
+        }
+
+        function addWorkflowEvent(type, taskId, details) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            const event = {
+                id: generateId('E'),
+                taskId: taskId,
+                timestamp: new Date().toISOString(),
+                initiator: currentUser ? currentUser.name : 'System',
+                type: type, // e.g., 'created', 'status-change', 'comment-added', 'assigned'
+                details: details,
+                taskTitle: task.title
+            };
+            workflowEvents.unshift(event); // Add to the beginning
+            saveWorkflowEvents();
+            renderRecentActivities();
+            renderWorkflowTrail();
+        }
+
+        function renderRecentActivities() {
+            const recentActivitiesDiv = document.getElementById('recent-activities');
+            recentActivitiesDiv.innerHTML = '<h3><i class="material-icons">fiber_new</i> Recent Activities</h3>';
+            const recentEvents = workflowEvents.slice(0, 5); // Show top 5 recent events
+
+            if (recentEvents.length === 0) {
+                recentActivitiesDiv.innerHTML += '<p>No recent activities.</p>';
+                return;
+            }
+
+            const ul = document.createElement('ul');
+            ul.className = 'activity-list';
+            recentEvents.forEach(event => {
+                const li = document.createElement('li');
+                let detailText = '';
+                if (event.type === 'created') {
+                    detailText = `Task "${event.taskTitle}" was created.`;
+                } else if (event.type === 'status-change') {
+                    detailText = `Status of "${event.taskTitle}" changed to <strong>${event.details.newStatus}</strong>.`;
+                } else if (event.type === 'comment-added') {
+                    detailText = `A new comment was added to "${event.taskTitle}".`;
+                } else if (event.type === 'assigned') {
+                    const assigneeNames = event.details.assigneeIds.map(id => users[id].name).join(', ');
+                    detailText = `Task "${event.taskTitle}" assigned to ${assigneeNames}.`;
+                }
+                li.innerHTML = `<i class="material-icons">event</i> ${detailText} <span class="timestamp">(${timeAgo(event.timestamp)}) by ${event.initiator}</span>`;
+                ul.appendChild(li);
+            });
+            recentActivitiesDiv.appendChild(ul);
+        }
+
+        function renderWorkflowTrail() {
+            const workflowTrailDisplay = document.getElementById('workflow-events');
+            const relevantEvents = workflowEvents.filter(event => event.taskId === currentOpenTaskId);
+
+            if (relevantEvents.length === 0) {
+                workflowTrailDisplay.innerHTML = '<p>No workflow history for this task.</p>';
+                return;
+            }
+
+            workflowTrailDisplay.innerHTML = '';
+            relevantEvents.forEach(event => {
+                const eventDiv = document.createElement('div');
+                eventDiv.className = 'workflow-item';
+                let icon = 'event';
+                let content = '';
+
+                if (event.type === 'created') {
+                    icon = 'add_task';
+                    content = `<strong>Task Created</strong> by ${event.initiator}`;
+                } else if (event.type === 'status-change') {
+                    icon = 'published_with_changes';
+                    content = `Status changed to <strong>${event.details.newStatus}</strong> by ${event.initiator}`;
+                } else if (event.type === 'comment-added') {
+                    icon = 'comment';
+                    content = `<strong>Comment Added</strong> by ${event.initiator}: "${event.details.commentSnippet}"`;
+                } else if (event.type === 'assigned') {
+                    icon = 'person_add';
+                    const assigneeNames = event.details.assigneeIds.map(id => users.find(u => u.id === id)?.name || 'Unknown').join(', ');
+                    content = `Task assigned to <strong>${assigneeNames}</strong> by ${event.initiator}`;
+                } else if (event.type === 'file-added') {
+                    icon = 'attach_file';
+                    content = `File(s) attached by ${event.initiator}: <em>${event.details.fileNames.join(', ')}</em>`;
+                }
+
+                eventDiv.innerHTML = `
+                    <div class="workflow-icon"><i class="material-icons">${icon}</i></div>
+                    <div class="workflow-content">
+                        ${content}
+                        <span>${formatDate(event.timestamp)} (${timeAgo(event.timestamp)})</span>
+                    </div>
+                `;
+                workflowTrailDisplay.appendChild(eventDiv);
+            });
+        }
+
+        // --- Dashboard Functions ---
+        function updateDashboard() {
+            const filter = document.getElementById('dashboard-filter').value;
+            const filteredTasks = tasks.filter(task => {
+                if (filter === 'all') return true;
+                if (filter === 'overdue') return new Date(task.dueDate) < new Date() && task.status !== 'Completed' && task.status !== 'Done';
+                return task.status.toLowerCase().replace(' ', '-') === filter;
+            });
+
+            const totalTasks = filteredTasks.length;
+            const notStarted = filteredTasks.filter(t => t.status === 'Not Started').length;
+            const inProgress = filteredTasks.filter(t => t.status === 'In Progress').length;
+            const completed = filteredTasks.filter(t => t.status === 'Completed').length;
+            const done = filteredTasks.filter(t => t.status === 'Done').length;
+            const overdue = filteredTasks.filter(t => new Date(t.dueDate) < new Date() && t.status !== 'Completed' && t.status !== 'Done').length;
+
+            const statsHtml = `
+                <div class="stat-item">
+                    <div class="stat-number">${totalTasks}</div>
+                    <div class="stat-label">Total Tasks</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">${notStarted}</div>
+                    <div class="stat-label">Not Started</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">${inProgress}</div>
+                    <div class="stat-label">In Progress</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">${completed}</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">${done}</div>
+                    <div class="stat-label">Done</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" style="background: var(--primary-red);">${overdue}</div>
+                    <div class="stat-label">Overdue</div>
+                </div>
+            `;
+            document.getElementById('dashboard-stats').innerHTML = statsHtml;
+            renderRecentActivities();
+        }
+
+        // --- Departmental Dashboard Functions ---
+        function updateDepartmentalDashboard() {
+            const filter = document.getElementById('departmental-dashboard-filter').value;
+            const departmentStats = {};
+
+            const allDepartments = [...new Set(users.map(u => u.department))].sort();
+
+            // Initialize department stats
+            allDepartments.forEach(dept => {
+                departmentStats[dept] = {
+                    total: 0,
+                    'Not Started': 0,
+                    'In Progress': 0,
+                    'Completed': 0,
+                    'Done': 0,
+                    'Overdue': 0
+                };
+            });
+
+            tasks.forEach(task => {
+                const taskDepartment = task.department;
+                if (departmentStats[taskDepartment]) {
+                    departmentStats[taskDepartment].total++;
+                    departmentStats[taskDepartment][task.status]++;
+                    if (new Date(task.dueDate) < new Date() && task.status !== 'Completed' && task.status !== 'Done') {
+                        departmentStats[taskDepartment]['Overdue']++;
+                    }
+                }
+            });
+
+            let statsHtml = '';
+            for (const dept in departmentStats) {
+                const stats = departmentStats[dept];
+                const displayedCount = (filter === 'all') ? stats.total : stats[filter];
+                const label = (filter === 'all') ? 'Total' : filter;
+                statsHtml += `
+                    <div class="stat-item" style="background: ${dept === 'Sales' ? '#006400' : dept === 'Marketing' ? '#4682B4' : dept === 'Human Resources' ? '#B22222' : dept === 'IT' ? '#ffc107' : '#e0e0e0'};">
+                        <div class="stat-number">${displayedCount}</div>
+                        <div class="stat-label">${dept} - ${label} Tasks</div>
+                    </div>
+                `;
+            }
+            document.getElementById('departmental-stats-grid').innerHTML = statsHtml;
+            renderDepartmentalTaskStatusChart();
+        }
+
+
+        // --- Charting Functions ---
+
+        // Overall Task Status Chart
+        function renderOverallTaskStatusChart() {
+            if (overallTaskStatusChartInstance) {
+                overallTaskStatusChartInstance.destroy();
+            }
+
+            const ctx = document.getElementById('overallTaskStatusChart').getContext('2d');
+            const statusCounts = {
+                'Not Started': 0,
+                'In Progress': 0,
+                'Completed': 0,
+                'Done': 0,
+                'Overdue': 0
+            };
+
+            tasks.forEach(task => {
+                if (task.status === 'Completed' || task.status === 'Done') {
+                    statusCounts[task.status]++;
+                } else if (new Date(task.dueDate) < new Date()) {
+                    statusCounts['Overdue']++;
+                } else {
+                    statusCounts[task.status]++;
+                }
+            });
+
+            overallTaskStatusChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(statusCounts),
+                    datasets: [{
+                        data: Object.values(statusCounts),
+                        backgroundColor: [
+                            'var(--primary-red)',
+                            'var(--warning-color)',
+                            'var(--accent-blue)',
+                            'var(--success-color)',
+                            '#8B0000' // Darker red for overdue
+                        ],
+                        borderColor: 'var(--primary-white)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: 'var(--primary-black)'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Overall Task Status Distribution',
+                            color: 'var(--primary-black)',
+                            font: { size: 18 }
+                        },
+                        datalabels: {
+                            color: 'var(--primary-white)',
+                            formatter: (value, context) => {
+                                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percentage = (value / total * 100).toFixed(1) + '%';
+                                return percentage;
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        // Departmental Task Status Chart
+        function renderDepartmentalTaskStatusChart() {
+            if (departmentalTaskStatusChartInstance) {
+                departmentalTaskStatusChartInstance.destroy();
+            }
+
+            const ctx = document.getElementById('departmentalTaskStatusChart').getContext('2d');
+            const departments = [...new Set(users.map(u => u.department))].sort();
+            const dataByDepartment = {};
+
+            departments.forEach(dept => {
+                dataByDepartment[dept] = {
+                    'Not Started': 0,
+                    'In Progress': 0,
+                    'Completed': 0,
+                    'Done': 0,
+                    'Overdue': 0
+                };
+            });
+
+            tasks.forEach(task => {
+                if (dataByDepartment[task.department]) {
+                    if (task.status === 'Completed' || task.status === 'Done') {
+                        dataByDepartment[task.department][task.status]++;
+                    } else if (new Date(task.dueDate) < new Date()) {
+                        dataByDepartment[task.department]['Overdue']++;
+                    } else {
+                        dataByDepartment[task.department][task.status]++;
+                    }
+                }
+            });
+
+            const datasets = [];
+            Object.keys(dataByDepartment).forEach(dept => {
+                datasets.push({
+                    label: dept,
+                    data: [
+                        dataByDepartment[dept]['Not Started'],
+                        dataByDepartment[dept]['In Progress'],
+                        dataByDepartment[dept]['Completed'],
+                        dataByDepartment[dept]['Done'],
+                        dataByDepartment[dept]['Overdue']
+                    ],
+                    backgroundColor: [
+                        'var(--primary-red)',
+                        'var(--warning-color)',
+                        'var(--accent-blue)',
+                        'var(--success-color)',
+                        '#8B0000'
+                    ],
+                    borderColor: 'rgba(255, 255, 255, 0.8)',
+                    borderWidth: 1
+                });
+            });
+
+            departmentalTaskStatusChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Not Started', 'In Progress', 'Completed', 'Done', 'Overdue'],
+                    datasets: datasets.map((ds, index) => ({
+                        ...ds,
+                        backgroundColor: (context) => {
+                            const colors = [
+                                'var(--primary-red)',
+                                'var(--warning-color)',
+                                'var(--accent-blue)',
+                                'var(--success-color)',
+                                '#8B0000'
+                            ];
+                            return colors[context.dataIndex];
+                        },
+                        // Assign a distinct color for each department's bars
+                        // This will make it a stacked bar or grouped bar depending on options
+                        // For grouped bars, we'd need multiple datasets, one per department, for each status
+                        // For simplicity, let's keep it as is, and use data labels to differentiate
+                        // If we want grouped, we'd iterate over departments for each status
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false // Hide legend as bars are color-coded by status
+                        },
+                        title: {
+                            display: true,
+                            text: 'Tasks Status by Department',
+                            color: 'var(--primary-black)',
+                            font: { size: 18 }
+                        },
+                        datalabels: {
+                            color: 'var(--primary-black)',
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: (value) => value > 0 ? value : ''
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false, // Set to true for stacked bars
+                            title: {
+                                display: true,
+                                text: 'Task Status',
+                                color: 'var(--primary-black)'
+                            },
+                            ticks: {
+                                color: 'var(--primary-black)'
+                            }
+                        },
+                        y: {
+                            stacked: false, // Set to true for stacked bars
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Tasks',
+                                color: 'var(--primary-black)'
+                            },
+                            ticks: {
+                                color: 'var(--primary-black)'
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+
+        // Tasks Completed by Department Chart
+        function renderTasksCompletedByDepartmentChart() {
+            if (tasksCompletedByDepartmentChartInstance) {
+                tasksCompletedByDepartmentChartInstance.destroy();
+            }
+
+            const ctx = document.getElementById('tasksCompletedByDepartmentChart').getContext('2d');
+            const departments = [...new Set(users.map(u => u.department))].sort();
+            const completedTasksCount = {};
+
+            departments.forEach(dept => completedTasksCount[dept] = 0);
+            tasks.filter(t => t.status === 'Completed' || t.status === 'Done').forEach(task => {
+                if (completedTasksCount[task.department] !== undefined) {
+                    completedTasksCount[task.department]++;
+                }
+            });
+
+            tasksCompletedByDepartmentChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: departments,
+                    datasets: [{
+                        label: 'Tasks Completed',
+                        data: departments.map(dept => completedTasksCount[dept]),
+                        backgroundColor: departments.map(dept => {
+                            if (dept === 'Sales') return 'var(--primary-green)';
+                            if (dept === 'Marketing') return 'var(--accent-blue)';
+                            if (dept === 'Human Resources') return 'var(--primary-red)';
+                            if (dept === 'IT') return 'var(--warning-color)';
+                            return 'var(--medium-gray)';
+                        }),
+                        borderColor: 'var(--primary-black)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Tasks Completed by Department',
+                            color: 'var(--primary-black)',
+                            font: { size: 18 }
+                        },
+                        datalabels: {
+                            color: 'var(--primary-white)',
+                            formatter: (value) => value > 0 ? value : ''
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Department',
+                                color: 'var(--primary-black)'
+                            },
+                            ticks: {
+                                color: 'var(--primary-black)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Tasks',
+                                color: 'var(--primary-black)'
+                            },
+                            ticks: {
+                                color: 'var(--primary-black)'
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        // Task Completion Time Chart (Average per Department/User)
+        function renderTaskCompletionTimeChart() {
+            if (taskCompletionTimeChartInstance) {
+                taskCompletionTimeChartInstance.destroy();
+            }
+
+            const ctx = document.getElementById('taskCompletionTimeChart').getContext('2d');
+            const departmentAvgCompletionTime = {};
+            const userAvgCompletionTime = {};
+
+            // Calculate for departments
+            const departments = [...new Set(users.map(u => u.department))].sort();
+            departments.forEach(dept => {
+                const deptTasks = tasks.filter(t => (t.status === 'Completed' || t.status === 'Done') && t.department === dept);
+                if (deptTasks.length > 0) {
+                    const totalDays = deptTasks.reduce((sum, task) => {
+                        const created = new Date(task.createdAt);
+                        const completed = new Date(task.completedAt || new Date()); // Assuming 'completedAt' is added on completion
+                        return sum + (completed - created) / (1000 * 60 * 60 * 24); // Days
+                    }, 0);
+                    departmentAvgCompletionTime[dept] = totalDays / deptTasks.length;
+                } else {
+                    departmentAvgCompletionTime[dept] = 0;
+                }
+            });
+
+            // Calculate for users (assignees)
+            users.forEach(user => {
+                const userTasks = tasks.filter(t => (t.status === 'Completed' || t.status === 'Done') && t.assignees.includes(user.id));
+                if (userTasks.length > 0) {
+                    const totalDays = userTasks.reduce((sum, task) => {
+                        const created = new Date(task.createdAt);
+                        const completed = new Date(task.completedAt || new Date());
+                        return sum + (completed - created) / (1000 * 60 * 60 * 24);
+                    }, 0);
+                    userAvgCompletionTime[user.name] = totalDays / userTasks.length;
+                } else {
+                    userAvgCompletionTime[user.name] = 0;
+                }
+            });
+
+            // Decide which data to show based on filter
+            const filterType = document.getElementById('performance-department-filter').value;
+            let labels = [];
+            let data = [];
+            let chartTitle = '';
+
+            if (filterType === 'all') { // Show by department
+                labels = departments;
+                data = departments.map(dept => departmentAvgCompletionTime[dept].toFixed(1));
+                chartTitle = 'Average Task Completion Time by Department (Days)';
+            } else { // Filtered by specific department, show by user within that department
+                const selectedDepartment = filterType;
+                const usersInDept = users.filter(u => u.department === selectedDepartment);
+                labels = usersInDept.map(u => u.name);
+                data = usersInDept.map(u => userAvgCompletionTime[u.name].toFixed(1));
+                chartTitle = `Average Task Completion Time for ${selectedDepartment} (Days)`;
+            }
+
+            taskCompletionTimeChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Avg. Completion Time (Days)',
+                        data: data,
+                        backgroundColor: 'var(--accent-blue)',
+                        borderColor: 'var(--primary-black)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: chartTitle,
+                            color: 'var(--primary-black)',
+                            font: { size: 18 }
+                        },
+                        datalabels: {
+                            color: 'var(--primary-white)',
+                            formatter: (value) => value > 0 ? value : ''
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: (filterType === 'all' ? 'Department' : 'User'),
+                                color: 'var(--primary-black)'
+                            },
+                            ticks: {
+                                color: 'var(--primary-black)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Days',
+                                color: 'var(--primary-black)'
+                            },
+                            ticks: {
+                                color: 'var(--primary-black)'
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        // User Task Distribution Chart (Pie/Doughnut)
+        function renderUserTaskDistributionChart() {
+            if (userTaskDistributionChartInstance) {
+                userTaskDistributionChartInstance.destroy();
+            }
+
+            const ctx = document.getElementById('userTaskDistributionChart').getContext('2d');
+            const userTaskCounts = {};
+
+            // Initialize all users to 0 tasks
+            users.forEach(user => {
+                userTaskCounts[user.name] = 0;
+            });
+
+            tasks.forEach(task => {
+                task.assignees.forEach(assigneeId => {
+                    const user = users.find(u => u.id === assigneeId);
+                    if (user) {
+                        userTaskCounts[user.name]++;
+                    }
+                });
+            });
+
+            // Filter out users with 0 tasks for a cleaner chart if desired, or show all
+            const labels = Object.keys(userTaskCounts).filter(name => userTaskCounts[name] > 0);
+            const data = labels.map(name => userTaskCounts[name]);
+
+            const backgroundColors = labels.map((_, index) => `hsl(${index * 60}, 70%, 50%)`); // Generate distinct colors
+
+            userTaskDistributionChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderColor: 'var(--primary-white)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: 'var(--primary-black)'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Task Distribution Among Users',
+                            color: 'var(--primary-black)',
+                            font: { size: 18 }
+                        },
+                        datalabels: {
+                            color: 'var(--primary-white)',
+                            formatter: (value, context) => {
+                                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percentage = (value / total * 100).toFixed(1) + '%';
+                                return percentage;
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+
+        // --- Task Creation ---
+        function populateAssigneesSelect() {
+            const assigneesSelect = document.getElementById('task-assignees');
+            const editAssigneesSelect = document.getElementById('edit-task-assignees');
+            assigneesSelect.innerHTML = '';
+            editAssigneesSelect.innerHTML = '';
+
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = `${user.name} (${user.department})`;
+                assigneesSelect.appendChild(option);
+
+                const editOption = option.cloneNode(true);
+                editAssigneesSelect.appendChild(editOption);
+            });
+            updateSelectedAssignees(); // Initialize tags for create form
+        }
+
+        function populateDepartmentSelect(selectId) {
+            const departmentSelect = document.getElementById(selectId);
+            departmentSelect.innerHTML = ''; // Clear existing options
+            const departments = [...new Set(users.map(user => user.department))].sort();
+
+            departments.forEach(department => {
+                const option = document.createElement('option');
+                option.value = department;
+                option.textContent = department;
+                departmentSelect.appendChild(option);
+            });
+        }
+
+        function updateDepartmentFilters() {
+            const departmentFilter = document.getElementById('department-filter');
+            const assignedDepartmentFilter = document.getElementById('assigned-department-filter');
+            const performanceDepartmentFilter = document.getElementById('performance-department-filter');
+
+            const departments = [...new Set(users.map(user => user.department))].sort();
+
+            // For My Tasks filter
+            departmentFilter.innerHTML = '<option value="all">All Departments</option>' +
+                                         departments.map(dept => `<option value="${dept}">${dept}</option>`).join('');
+
+            // For Assigned to Me filter
+            assignedDepartmentFilter.innerHTML = '<option value="all">All Departments</option>' +
+                                                 departments.map(dept => `<option value="${dept}">${dept}</option>`).join('');
+
+            // For Performance dashboard filter
+            performanceDepartmentFilter.innerHTML = '<option value="all">All Departments</option>' +
+                                                    departments.map(dept => `<option value="${dept}">${dept}</option>`).join('');
+        }
+
+        function updatePriorityFilters() {
+            const priorityFilter = document.getElementById('priority-filter');
+            const assignedPriorityFilter = document.getElementById('assigned-priority-filter');
+            const priorities = ['All', 'Low', 'Medium', 'High', 'Urgent'];
+
+            priorityFilter.innerHTML = priorities.map(p => `<option value="${p.toLowerCase()}">${p} Priority</option>`).join('');
+            assignedPriorityFilter.innerHTML = priorities.map(p => `<option value="${p.toLowerCase()}">${p} Priority</option>`).join('');
+        }
+
+        function updateDependencyOptions() {
+            const dependencySelect = document.getElementById('task-dependencies');
+            dependencySelect.innerHTML = '';
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "No Dependencies";
+            dependencySelect.appendChild(defaultOption);
+
+            tasks.forEach(task => {
+                if (task.id !== currentOpenTaskId) { // Prevent self-dependency
+                    const option = document.createElement('option');
+                    option.value = task.id;
+                    option.textContent = `${task.title} (ID: ${task.id}, Status: ${task.status})`;
+                    dependencySelect.appendChild(option);
+                }
+            });
+        }
+
+        function updateSelectedAssignees(isEdit = false, currentAssignees = []) {
+            const selectId = isEdit ? 'edit-task-assignees' : 'task-assignees';
+            const tagsContainerId = isEdit ? 'edit-selected-assignees-tags' : 'selected-assignees-tags';
+
+            const selectElement = document.getElementById(selectId);
+            const tagsContainer = document.getElementById(tagsContainerId);
+            tagsContainer.innerHTML = '';
+
+            let selectedUserIds = [];
+            if (isEdit) {
+                selectedUserIds = currentAssignees;
+            } else {
+                selectedUserIds = Array.from(selectElement.selectedOptions).map(option => option.value);
+            }
+
+            selectedUserIds.forEach(userId => {
+                const user = users.find(u => u.id === userId);
+                if (user) {
+                    const tag = document.createElement('span');
+                    tag.className = 'assignee-tag';
+                    tag.innerHTML = `${user.name} <span class="remove-tag" data-user-id="${user.id}">&times;</span>`;
+                    tagsContainer.appendChild(tag);
+                }
+            });
+
+            tagsContainer.querySelectorAll('.remove-tag').forEach(tag => {
+                tag.onclick = (event) => {
+                    const userIdToRemove = event.target.dataset.userId;
+                    if (isEdit) {
+                        const optionToDeselect = Array.from(selectElement.options).find(opt => opt.value === userIdToRemove);
+                        if (optionToDeselect) {
+                            optionToDeselect.selected = false;
+                        }
+                        // Manually remove from the currentAssignees array for edit modal
+                        currentOpenTask.assignees = currentOpenTask.assignees.filter(id => id !== userIdToRemove);
+                        updateSelectedAssignees(true, currentOpenTask.assignees); // Re-render tags
+                    } else {
+                        const optionToDeselect = Array.from(selectElement.options).find(opt => opt.value === userIdToRemove);
+                        if (optionToDeselect) {
+                            optionToDeselect.selected = false;
+                        }
+                        // Trigger change event to update the select element's internal state
+                        const event = new Event('change');
+                        selectElement.dispatchEvent(event);
+                    }
+                };
+            });
+
+            // Ensure the select element's options reflect the chosen state for the create form
+            if (!isEdit) {
+                Array.from(selectElement.options).forEach(option => {
+                    option.selected = selectedUserIds.includes(option.value);
+                });
+            }
+        }
+
+
+        function createTask(event) {
+            event.preventDefault();
+            const title = document.getElementById('task-title').value;
+            const description = document.getElementById('task-description').value;
+            const dueDate = document.getElementById('task-due-date').value;
+            const priority = document.getElementById('task-priority').value;
+            const assignees = Array.from(document.getElementById('task-assignees').selectedOptions).map(option => option.value);
+            const department = document.getElementById('task-department').value;
+            const status = document.getElementById('task-status').value;
+            const dependencies = Array.from(document.getElementById('task-dependencies').selectedOptions).map(option => option.value);
+
+            if (assignees.length === 0) {
+                showNotification('Please assign at least one user to the task.', 'error');
+                return;
+            }
+            if (!department) {
+                showNotification('Please select an associated department for the task.', 'error');
+                return;
+            }
+
+            const newTask = {
+                id: generateId(),
+                title,
+                description,
+                dueDate,
+                priority,
+                creator: currentUser ? currentUser.id : 'anonymous',
+                assignees,
+                department,
+                status,
+                dependencies,
+                comments: [],
+                attachments: [],
+                createdAt: new Date().toISOString(),
+                workflow: ['created']
+            };
+
+            // Handle attachments from the form
+            const files = document.getElementById('task-attachments').files;
+            if (files.length > 0) {
+                const attachmentNames = [];
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const fileId = generateId('F');
+                    const fileUrl = URL.createObjectURL(file); // Create a temporary URL
+                    newTask.attachments.push({ id: fileId, name: file.name, url: fileUrl, type: file.type });
+                    attachmentNames.push(file.name);
+                }
+                addWorkflowEvent('file-added', newTask.id, { fileNames: attachmentNames });
+            }
+
+            tasks.push(newTask);
+            saveTasks();
+            addWorkflowEvent('created', newTask.id, {});
+            addWorkflowEvent('assigned', newTask.id, { assigneeIds: assignees }); // Log assignment
+
+            document.getElementById('task-form').reset();
+            document.getElementById('selected-assignees-tags').innerHTML = ''; // Clear tags
+            document.getElementById('file-previews').innerHTML = '';
+            document.getElementById('file-list-display').innerHTML = '';
+            updateDependencyOptions(); // Update dependencies for next task
+            showNotification('Task created successfully!', 'success');
+            showPage('tasks'); // Go to tasks list after creation
+        }
+
+        // --- Workplan Management ---
+        function selectWorkplanOption(option) {
+            document.getElementById('option-upload').classList.remove('selected');
+            document.getElementById('option-manual').classList.remove('selected');
+            document.getElementById('workplan-upload-section').style.display = 'none';
+            document.getElementById('task-form').style.display = 'none';
+            document.getElementById('manual-task-form-container').style.display = 'none';
+            document.getElementById('add-manual-task-btn').style.display = 'none';
+            document.getElementById('save-manual-tasks-btn').style.display = 'none';
+
+            if (option === 'upload') {
+                document.getElementById('option-upload').classList.add('selected');
+                document.getElementById('workplan-upload-section').style.display = 'block';
+            } else if (option === 'manual') {
+                document.getElementById('option-manual').classList.add('selected');
+                document.getElementById('manual-task-form-container').style.display = 'block';
+                document.getElementById('add-manual-task-btn').style.display = 'inline-flex';
+                document.getElementById('save-manual-tasks-btn').style.display = 'inline-flex';
+                // Ensure at least one manual field is always present when switching to manual entry
+                if (manualTaskCount === 0) {
+                    addManualTaskField();
+                }
+            }
+        }
+
+        function handleWorkplanUpload() {
+            const fileInput = document.getElementById('workplan-file');
+            const previewDiv = document.getElementById('parsed-tasks-preview');
+            const parsedList = document.getElementById('parsed-tasks-list');
+            parsedList.innerHTML = ''; // Clear previous previews
+
+            const file = fileInput.files[0];
+            if (!file) {
+                previewDiv.style.display = 'none';
+                return;
+            }
+
+            // Simulate parsing - In a real app, this would involve server-side processing
+            showNotification(`Parsing "${file.name}"... (simulation)`, 'info');
+            previewDiv.style.display = 'block';
+
+            // Example parsed tasks (replace with actual parsing logic)
+            const sampleParsedTasks = [
+                { title: 'Prepare Annual Budget', description: 'Consolidate department budgets and forecast.', dueDate: '2025-09-30', priority: 'High', department: 'Finance' },
+                { title: 'Organize Company Retreat', description: 'Book venue, plan activities, send invitations.', dueDate: '2025-10-15', priority: 'Medium', department: 'Human Resources' },
+                { title: 'Update Q3 Marketing Report', description: 'Analyze campaign performance and generate report.', dueDate: '2025-09-05', priority: 'High', department: 'Marketing' }
+            ];
+
+            parsedWorkplanFiles[file.name] = sampleParsedTasks; // Store for confirmation
+
+            if (sampleParsedTasks.length > 0) {
+                sampleParsedTasks.forEach((task, index) => {
+                    const taskDiv = document.createElement('div');
+                    taskDiv.className = 'task-item'; // Re-use task-item styling
+                    taskDiv.innerHTML = `
+                        <div class="task-header">
+                            <div class="task-title">${task.title}</div>
+                            <span class="task-status status-not-started">Parsed (Not Added)</span>
+                        </div>
+                        <div class="task-meta">
+                            <span><i class="material-icons">description</i> ${task.description || 'No description'}</span>
+                            <span><i class="material-icons">calendar_today</i> Due: ${formatDate(task.dueDate)}</span>
+                            <span><i class="material-icons">flag</i> Priority: ${task.priority}</span>
+                            <span><i class="material-icons">apartment</i> Dept: ${task.department}</span>
+                        </div>
+                    `;
+                    parsedList.appendChild(taskDiv);
+                });
+            } else {
+                parsedList.innerHTML = '<p>No tasks found in the document.</p>';
+                document.querySelector('#parsed-tasks-preview .btn-success').style.display = 'none';
+            }
+        }
+
+        function confirmParsedTasks() {
+            const fileInput = document.getElementById('workplan-file');
+            const fileName = fileInput.files[0] ? fileInput.files[0].name : null;
+            if (!fileName || !parsedWorkplanFiles[fileName]) {
+                showNotification('No parsed tasks to add or file not found.', 'error');
+                return;
+            }
+
+            const newTasksBatch = parsedWorkplanFiles[fileName].map(parsedTask => {
+                const defaultAssignee = users.find(u => u.department === parsedTask.department) || currentUser;
+                return {
+                    id: generateId(),
+                    title: parsedTask.title,
+                    description: parsedTask.description,
+                    dueDate: parsedTask.dueDate,
+                    priority: parsedTask.priority,
+                    creator: currentUser ? currentUser.id : 'anonymous',
+                    assignees: defaultAssignee ? [defaultAssignee.id] : [], // Assign to first user in that dept or current user
+                    department: parsedTask.department || 'General',
+                    status: 'Not Started',
+                    dependencies: [],
+                    comments: [],
+                    attachments: [],
+                    createdAt: new Date().toISOString(),
+                    workflow: ['created']
+                };
+            });
+
+            tasks.push(...newTasksBatch);
+            saveTasks();
+
+            newTasksBatch.forEach(task => {
+                addWorkflowEvent('created', task.id, {});
+                if (task.assignees.length > 0) {
+                    addWorkflowEvent('assigned', task.id, { assigneeIds: task.assignees });
+                }
+            });
+
+            document.getElementById('parsed-tasks-preview').style.display = 'none';
+            document.getElementById('workplan-file').value = ''; // Clear file input
+            showNotification(`${newTasksBatch.length} tasks added from workplan!`, 'success');
+            showPage('tasks');
+        }
+
+        function addManualTaskField() {
+            manualTaskCount++;
+            const container = document.getElementById('manual-task-form-container');
+            const newFieldsetId = `manual-task-${manualTaskCount}`;
+
+            const fieldset = document.createElement('div');
+            fieldset.className = 'manual-task-item';
+            fieldset.id = newFieldsetId;
+            fieldset.innerHTML = `
+                <h4>Task ${manualTaskCount}</h4>
+                <button type="button" class="remove-btn" onclick="removeManualTaskField('${newFieldsetId}')">&times;</button>
+                <div class="form-group">
+                    <label class="form-label" for="manual-title-${manualTaskCount}">Task Title*</label>
+                    <input type="text" class="form-input" id="manual-title-${manualTaskCount}" placeholder="Task Title" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="manual-description-${manualTaskCount}">Description</label>
+                    <textarea class="form-textarea" id="manual-description-${manualTaskCount}" placeholder="Task Description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="manual-dueDate-${manualTaskCount}">Due Date*</label>
+                    <input type="date" class="form-input" id="manual-dueDate-${manualTaskCount}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="manual-priority-${manualTaskCount}">Priority*</label>
+                    <select class="form-select" id="manual-priority-${manualTaskCount}" required>
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                        <option value="Urgent">Urgent</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="manual-assignees-${manualTaskCount}">Assign Task To*</label>
+                    <select class="form-select" id="manual-assignees-${manualTaskCount}" multiple required>
+                        </select>
+                     <div class="selected-assignees-tags" id="manual-assignees-tags-${manualTaskCount}"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="manual-department-${manualTaskCount}">Associated Department*</label>
+                    <select class="form-select" id="manual-department-${manualTaskCount}" required>
+                        </select>
+                </div>
+            `;
+            container.appendChild(fieldset);
+
+            // Populate assignees and departments for the new field
+            const manualAssigneesSelect = document.getElementById(`manual-assignees-${manualTaskCount}`);
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = `${user.name} (${user.department})`;
+                manualAssigneesSelect.appendChild(option);
+            });
+            // Add event listener for real-time tag updates
+            manualAssigneesSelect.onchange = () => updateManualSelectedAssignees(manualTaskCount);
+            // Initial render of tags for newly added field
+            updateManualSelectedAssignees(manualTaskCount);
+
+
+            populateDepartmentSelect(`manual-department-${manualTaskCount}`);
+
+            // If this is the first manual task field, hide the main task form
+            if (manualTaskCount === 1) {
+                document.getElementById('task-form').style.display = 'none';
+            }
+        }
+
+        function updateManualSelectedAssignees(count) {
+            const selectElement = document.getElementById(`manual-assignees-${count}`);
+            const tagsContainer = document.getElementById(`manual-assignees-tags-${count}`);
+            tagsContainer.innerHTML = '';
+
+            const selectedUserIds = Array.from(selectElement.selectedOptions).map(option => option.value);
+
+            selectedUserIds.forEach(userId => {
+                const user = users.find(u => u.id === userId);
+                if (user) {
+                    const tag = document.createElement('span');
+                    tag.className = 'assignee-tag';
+                    tag.innerHTML = `${user.name} <span class="remove-tag" data-user-id="${user.id}" data-task-count="${count}">&times;</span>`;
+                    tagsContainer.appendChild(tag);
+                }
+            });
+
+            tagsContainer.querySelectorAll('.remove-tag').forEach(tag => {
+                tag.onclick = (event) => {
+                    const userIdToRemove = event.target.dataset.userId;
+                    const taskCount = event.target.dataset.taskCount;
+                    const targetSelect = document.getElementById(`manual-assignees-${taskCount}`);
+                    const optionToDeselect = Array.from(targetSelect.options).find(opt => opt.value === userIdToRemove);
+                    if (optionToDeselect) {
+                        optionToDeselect.selected = false;
+                    }
+                    updateManualSelectedAssignees(taskCount); // Re-render tags for this specific field
+                };
+            });
+        }
+
+
+        function removeManualTaskField(id) {
+            const fieldset = document.getElementById(id);
+            if (fieldset) {
+                fieldset.remove();
+                manualTaskCount--; // Decrement count
+                // Re-number remaining fields if necessary (optional, but good for consistency)
+                document.querySelectorAll('.manual-task-item').forEach((item, index) => {
+                    item.querySelector('h4').textContent = `Task ${index + 1}`;
+                });
+            }
+            if (manualTaskCount === 0) {
+                 showNotification('All manual task fields removed. You can add new ones.', 'info');
+                 // Optionally, switch back to a default view or hide the manual entry section buttons
+                 document.getElementById('manual-task-form-container').innerHTML = '';
+                 document.getElementById('add-manual-task-btn').style.display = 'none';
+                 document.getElementById('save-manual-tasks-btn').style.display = 'none';
+            }
+        }
+
+        function saveManualTasks() {
+            const manualTaskItems = document.querySelectorAll('.manual-task-item');
+            const newTasksBatch = [];
+            let isValid = true;
+
+            manualTaskItems.forEach((item, index) => {
+                const titleInput = item.querySelector(`#manual-title-${index + 1}`);
+                const descriptionInput = item.querySelector(`#manual-description-${index + 1}`);
+                const dueDateInput = item.querySelector(`#manual-dueDate-${index + 1}`);
+                const priorityInput = item.querySelector(`#manual-priority-${index + 1}`);
+                const assigneesSelect = item.querySelector(`#manual-assignees-${index + 1}`);
+                const departmentSelect = item.querySelector(`#manual-department-${index + 1}`);
+
+                if (!titleInput.value || !dueDateInput.value || assigneesSelect.selectedOptions.length === 0 || !departmentSelect.value) {
+                    showNotification(`Please fill all required fields for Task ${index + 1}.`, 'error');
+                    isValid = false;
+                    return;
+                }
+
+                newTasksBatch.push({
+                    id: generateId(),
+                    title: titleInput.value,
+                    description: descriptionInput.value,
+                    dueDate: dueDateInput.value,
+                    priority: priorityInput.value,
+                    creator: currentUser ? currentUser.id : 'anonymous',
+                    assignees: Array.from(assigneesSelect.selectedOptions).map(option => option.value),
+                    department: departmentSelect.value,
+                    status: 'Not Started',
+                    dependencies: [],
+                    comments: [],
+                    attachments: [],
+                    createdAt: new Date().toISOString(),
+                    workflow: ['created', 'created from manual entry']
+                });
+            });
+
+            if (!isValid) return;
+
+            tasks.push(...newTasksBatch);
+            saveTasks();
+
+            newTasksBatch.forEach(task => {
+                addWorkflowEvent('created', task.id, {});
+                addWorkflowEvent('assigned', task.id, { assigneeIds: task.assignees });
+            });
+
+            document.getElementById('manual-task-form-container').innerHTML = ''; // Clear fields
+            manualTaskCount = 0; // Reset count
+            addManualTaskField(); // Add one empty field for next use
+            showNotification(`${newTasksBatch.length} tasks added from manual workplan entry!`, 'success');
+            showPage('tasks');
+        }
+
+
+        // --- Task Listing (My Tasks & Assigned to Me) ---
+        function updateTasksView() {
+            const searchInput = document.getElementById('task-search').value.toLowerCase();
+            const statusFilter = document.getElementById('tasks-filter').value;
+            const departmentFilter = document.getElementById('department-filter').value;
+            const priorityFilter = document.getElementById('priority-filter').value;
+            const sortBy = document.getElementById('sort-by').value;
+
+            let filteredTasks = tasks.filter(task => task.creator === (currentUser ? currentUser.id : 'anonymous'));
+
+            if (searchInput) {
+                filteredTasks = filteredTasks.filter(task =>
+                    task.title.toLowerCase().includes(searchInput) ||
+                    task.description.toLowerCase().includes(searchInput)
+                );
+            }
+            if (statusFilter !== 'all') {
+                if (statusFilter === 'overdue') {
+                    filteredTasks = filteredTasks.filter(task => new Date(task.dueDate) < new Date() && task.status !== 'Completed' && task.status !== 'Done');
+                } else {
+                    filteredTasks = filteredTasks.filter(task => task.status.toLowerCase().replace(' ', '-') === statusFilter);
+                }
+            }
+            if (departmentFilter !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.department === departmentFilter);
+            }
+            if (priorityFilter !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.priority.toLowerCase() === priorityFilter);
+            }
+
+            // Sorting
+            filteredTasks.sort((a, b) => {
+                if (sortBy === 'createdAt') {
+                    return new Date(b.createdAt) - new Date(a.createdAt); // Newest first
+                } else if (sortBy === 'dueDate') {
+                    return new Date(a.dueDate) - new Date(b.dueDate); // Soonest first
+                } else if (sortBy === 'priority') {
+                    const priorityOrder = { 'Urgent': 4, 'High': 3, 'Medium': 2, 'Low': 1 };
+                    return priorityOrder[b.priority] - priorityOrder[a.priority]; // Highest priority first
+                }
+                return 0;
+            });
+
+            renderTaskList('my-tasks-list', filteredTasks);
+        }
+
+        function updateAssignedTasksView() {
+            const searchInput = document.getElementById('assigned-task-search').value.toLowerCase();
+            const statusFilter = document.getElementById('assigned-filter').value;
+            const departmentFilter = document.getElementById('assigned-department-filter').value;
+            const priorityFilter = document.getElementById('assigned-priority-filter').value;
+
+
+            let filteredTasks = tasks.filter(task => task.assignees.includes(currentUser ? currentUser.id : ''));
+
+            if (searchInput) {
+                filteredTasks = filteredTasks.filter(task =>
+                    task.title.toLowerCase().includes(searchInput) ||
+                    task.description.toLowerCase().includes(searchInput)
+                );
+            }
+            if (statusFilter !== 'all') {
+                if (statusFilter === 'overdue') {
+                    filteredTasks = filteredTasks.filter(task => new Date(task.dueDate) < new Date() && task.status !== 'Completed' && task.status !== 'Done');
+                } else {
+                    filteredTasks = filteredTasks.filter(task => task.status.toLowerCase().replace(' ', '-') === statusFilter);
+                }
+            }
+            if (departmentFilter !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.department === departmentFilter);
+            }
+            if (priorityFilter !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.priority.toLowerCase() === priorityFilter);
+            }
+
+            const noticeDiv = document.getElementById('assigned-tasks-notice');
+            if (filteredTasks.length === 0) {
+                noticeDiv.innerHTML = '<p style="text-align: center; color: var(--medium-gray);">No tasks found assigned to you based on current filters.</p>';
+            } else {
+                noticeDiv.innerHTML = '';
+            }
+
+            renderTaskList('assigned-tasks-list', filteredTasks);
+        }
+
+        function renderTaskList(elementId, taskList) {
+            const listDiv = document.getElementById(elementId);
+            listDiv.innerHTML = '';
+
+            if (taskList.length === 0) {
+                listDiv.innerHTML = '<p style="text-align: center; color: var(--medium-gray);">No tasks to display.</p>';
+                return;
+            }
+
+            taskList.forEach(task => {
+                const assigneesNames = task.assignees.map(assigneeId => users.find(u => u.id === assigneeId)?.name || 'Unknown User').join(', ');
+                const creatorName = users.find(u => u.id === task.creator)?.name || 'Unknown Creator';
+                const isOverdue = new Date(task.dueDate) < new Date() && task.status !== 'Completed' && task.status !== 'Done';
+                const statusClass = task.status.toLowerCase().replace(' ', '-');
+
+                const taskDiv = document.createElement('div');
+                taskDiv.className = `task-item ${isOverdue ? 'overdue' : ''}`;
+                taskDiv.innerHTML = `
+                    <div class="task-header">
+                        <div class="task-title" onclick="openTaskDetailModal('${task.id}')">${task.title}</div>
+                        <span class="task-status status-${statusClass}" onclick="changeTaskStatusPrompt('${task.id}', '${task.status}')">${task.status}</span>
+                    </div>
+                    <div class="task-meta">
+                        <span><i class="material-icons">calendar_today</i> Due: ${formatDate(task.dueDate)}</span>
+                        <span><i class="material-icons">flag</i> Priority: ${task.priority}</span>
+                        <span><i class="material-icons">person</i> Creator: ${creatorName}</span>
+                        <span><i class="material-icons">group</i> Assignees: ${assigneesNames}</span>
+                        <span><i class="material-icons">apartment</i> Department: ${task.department}</span>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn btn-secondary" onclick="openTaskDetailModal('${task.id}')"><i class="material-icons">info</i> Details</button>
+                        ${task.creator === (currentUser ? currentUser.id : '') ? `<button class="btn btn-secondary" onclick="openEditTaskModal('${task.id}')"><i class="material-icons">edit</i> Edit</button>` : ''}
+                    </div>
+                `;
+                listDiv.appendChild(taskDiv);
+            });
+        }
+
+        // --- Task Details & Modals ---
+        let currentOpenTask = null; // Stores the task object currently open in the modal
+
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function openTaskDetailModal(taskId) {
+            currentOpenTaskId = taskId;
+            currentOpenTask = tasks.find(task => task.id === taskId);
+            if (!currentOpenTask) {
+                showNotification('Task not found!', 'error');
+                return;
+            }
+
+            document.getElementById('modal-task-title').textContent = currentOpenTask.title;
+            document.getElementById('modal-task-description').textContent = currentOpenTask.description || 'N/A';
+            document.getElementById('modal-task-status').textContent = currentOpenTask.status;
+            document.getElementById('modal-task-status').className = `task-status status-${currentOpenTask.status.toLowerCase().replace(' ', '-')}`;
+            document.getElementById('modal-task-due-date').textContent = formatDate(currentOpenTask.dueDate);
+            document.getElementById('modal-task-priority').textContent = currentOpenTask.priority;
+            document.getElementById('modal-task-creator').textContent = users.find(u => u.id === currentOpenTask.creator)?.name || 'Unknown';
+            document.getElementById('modal-task-department').textContent = currentOpenTask.department;
+
+
+            const assigneesNames = currentOpenTask.assignees.map(assigneeId => users.find(u => u.id === assigneeId)?.name || 'Unknown').join(', ');
+            document.getElementById('modal-task-assignees').textContent = assigneesNames;
+
+            const dependencyNames = currentOpenTask.dependencies.map(depId => {
+                const depTask = tasks.find(t => t.id === depId);
+                return depTask ? depTask.title : 'Unknown Task';
+            }).join(', ');
+            document.getElementById('modal-task-dependencies').textContent = dependencyNames || 'None';
+
+            // Render comments
+            const commentsList = document.getElementById('modal-comments-list');
+            commentsList.innerHTML = '';
+            if (currentOpenTask.comments.length === 0) {
+                commentsList.innerHTML = '<p>No comments yet.</p>';
+            } else {
+                currentOpenTask.comments.forEach(comment => {
+                    const commentDiv = document.createElement('div');
+                    commentDiv.className = 'comment';
+                    commentDiv.innerHTML = `
+                        <div class="comment-author">${comment.authorName} <span class="timestamp">${timeAgo(comment.timestamp)}</span></div>
+                        <p>${comment.text}</p>
+                    `;
+                    commentsList.appendChild(commentDiv);
+                });
+            }
+
+            // Render attachments
+            const attachmentsList = document.getElementById('modal-task-attachments');
+            attachmentsList.innerHTML = '';
+            if (currentOpenTask.attachments && currentOpenTask.attachments.length > 0) {
+                currentOpenTask.attachments.forEach(attachment => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `<i class="material-icons">attachment</i> <a href="${attachment.url}" target="_blank" download="${attachment.name}">${attachment.name}</a>`;
+                    attachmentsList.appendChild(fileItem);
+                });
+            } else {
+                attachmentsList.innerHTML = '<p>No attachments.</p>';
+            }
+
+
+            renderWorkflowTrail(); // Update workflow trail for this specific task
+            openModal('taskDetailModal');
+        }
+
+        function addCommentToTask() {
+            const commentInput = document.getElementById('new-comment-input');
+            const commentText = commentInput.value.trim();
+
+            if (!commentText || !currentOpenTask) {
+                showNotification('Comment cannot be empty.', 'warning');
+                return;
+            }
+
+            const newComment = {
+                authorId: currentUser ? currentUser.id : 'anonymous',
+                authorName: currentUser ? currentUser.name : 'Anonymous',
+                timestamp: new Date().toISOString(),
+                text: commentText
+            };
+
+            currentOpenTask.comments.push(newComment);
+            saveTasks();
+            addWorkflowEvent('comment-added', currentOpenTask.id, { commentSnippet: commentText.substring(0, 50) + (commentText.length > 50 ? '...' : '') });
+
+            commentInput.value = ''; // Clear input
+            openTaskDetailModal(currentOpenTask.id); // Re-render modal to show new comment
+            showNotification('Comment added!', 'success');
+        }
+
+        function changeTaskStatusPrompt(taskId = null, currentStatus = null) {
+            const targetTaskId = taskId || currentOpenTaskId;
+            const task = tasks.find(t => t.id === targetTaskId);
+
+            if (!task) {
+                showNotification('Task not found!', 'error');
+                return;
+            }
+
+            const newStatus = prompt(`Change status for "${task.title}" (Current: ${task.status}). Enter new status: Not Started, In Progress, Completed, Done`);
+
+            if (newStatus) {
+                const normalizedStatus = newStatus.trim().toLowerCase();
+                let validStatus = '';
+                if (['not started', 'not-started'].includes(normalizedStatus)) {
+                    validStatus = 'Not Started';
+                } else if (['in progress', 'in-progress'].includes(normalizedStatus)) {
+                    validStatus = 'In Progress';
+                } else if (normalizedStatus === 'completed') {
+                    validStatus = 'Completed';
+                } else if (normalizedStatus === 'done') {
+                    validStatus = 'Done';
+                } else {
+                    showNotification('Invalid status entered. Please use: Not Started, In Progress, Completed, Done.', 'error');
+                    return;
+                }
+
+                if (task.status !== validStatus) {
+                    task.status = validStatus;
+                    if (validStatus === 'Completed' || validStatus === 'Done') {
+                        task.completedAt = new Date().toISOString(); // Record completion time
+                    } else {
+                        delete task.completedAt; // Remove if status changes from completed/done
+                    }
+                    saveTasks();
+                    addWorkflowEvent('status-change', task.id, { oldStatus: currentStatus, newStatus: validStatus });
+                    showNotification(`Task status changed to ${validStatus}!`, 'success');
+                    if (document.getElementById('taskDetailModal').style.display === 'flex') {
+                        openTaskDetailModal(task.id); // Re-render modal if open
+                    }
+                    updateTasksView();
+                    updateAssignedTasksView();
+                    updateDashboard();
+                    updateDepartmentalDashboard();
+                    updatePerformanceDashboard(); // Update performance charts
+                } else {
+                    showNotification('Task already has this status.', 'info');
+                }
+            }
+        }
+
+        function deleteTaskPrompt(taskId = null) {
+            const targetTaskId = taskId || currentOpenTaskId;
+            const task = tasks.find(t => t.id === targetTaskId);
+
+            if (!task) {
+                showNotification('Task not found!', 'error');
+                return;
+            }
+
+            if (confirm(`Are you sure you want to delete the task: "${task.title}"? This action cannot be undone.`)) {
+                tasks = tasks.filter(t => t.id !== targetTaskId);
+                saveTasks();
+                addWorkflowEvent('deleted', targetTaskId, { taskTitle: task.title }); // Log deletion
+                closeModal('taskDetailModal');
+                showNotification('Task deleted successfully!', 'success');
+                updateTasksView();
+                updateAssignedTasksView();
+                updateDashboard();
+                updateDepartmentalDashboard();
+                updateDependencyOptions(); // Update dependencies in case a deleted task was a dependency
+            }
+        }
+
+        function openEditTaskModal(taskId = null) {
+            currentOpenTaskId = taskId || currentOpenTaskId;
+            currentOpenTask = tasks.find(task => task.id === currentOpenTaskId);
+
+            if (!currentOpenTask) {
+                showNotification('Task not found for editing!', 'error');
+                return;
+            }
+
+            document.getElementById('edit-task-id').value = currentOpenTask.id;
+            document.getElementById('edit-task-title').value = currentOpenTask.title;
+            document.getElementById('edit-task-description').value = currentOpenTask.description;
+            document.getElementById('edit-task-due-date').value = currentOpenTask.dueDate;
+            document.getElementById('edit-task-priority').value = currentOpenTask.priority;
+            document.getElementById('edit-task-department').value = currentOpenTask.department;
+
+            // Populate assignees and set selected
+            const editAssigneesSelect = document.getElementById('edit-task-assignees');
+            populateAssigneesSelect(); // This will populate both task-assignees and edit-task-assignees
+            Array.from(editAssigneesSelect.options).forEach(option => {
+                option.selected = currentOpenTask.assignees.includes(option.value);
+            });
+            updateSelectedAssignees(true, currentOpenTask.assignees); // Update tags for edit form
+
+            // Display current attachments in edit modal
+            const editAttachmentsList = document.getElementById('edit-file-list-display');
+            editAttachmentsList.innerHTML = '';
+            if (currentOpenTask.attachments && currentOpenTask.attachments.length > 0) {
+                currentOpenTask.attachments.forEach(attachment => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `<i class="material-icons">attachment</i> <a href="${attachment.url}" target="_blank" download="${attachment.name}">${attachment.name}</a> <span class="remove-attachment" data-file-id="${attachment.id}" data-task-id="${currentOpenTask.id}">&times; Remove</span>`;
+                    editAttachmentsList.appendChild(fileItem);
+                });
+                editAttachmentsList.querySelectorAll('.remove-attachment').forEach(btn => {
+                    btn.onclick = (event) => removeAttachment(event.target.dataset.taskId, event.target.dataset.fileId);
+                });
+            } else {
+                editAttachmentsList.innerHTML = '<p>No current attachments.</p>';
+            }
+            document.getElementById('new-file-previews-edit').innerHTML = ''; // Clear previews for new attachments
+
+            closeModal('taskDetailModal');
+            openModal('editTaskModal');
+        }
+
+        function saveEditedTask(event) {
+            event.preventDefault();
+            const taskId = document.getElementById('edit-task-id').value;
+            const taskIndex = tasks.findIndex(t => t.id === taskId);
+
+            if (taskIndex === -1) {
+                showNotification('Error: Task not found!', 'error');
+                return;
+            }
+
+            const task = tasks[taskIndex];
+            const oldAssignees = [...task.assignees]; // Clone for comparison
+
+            task.title = document.getElementById('edit-task-title').value;
+            task.description = document.getElementById('edit-task-description').value;
+            task.dueDate = document.getElementById('edit-task-due-date').value;
+            task.priority = document.getElementById('edit-task-priority').value;
+            task.assignees = Array.from(document.getElementById('edit-task-assignees').selectedOptions).map(option => option.value);
+            task.department = document.getElementById('edit-task-department').value;
+
+            if (task.assignees.length === 0) {
+                showNotification('Please assign at least one user to the task.', 'error');
+                return;
+            }
+
+            // Handle new attachments
+            const newFiles = document.getElementById('add-new-attachments').files;
+            if (newFiles.length > 0) {
+                const attachmentNames = [];
+                for (let i = 0; i < newFiles.length; i++) {
+                    const file = newFiles[i];
+                    const fileId = generateId('F');
+                    const fileUrl = URL.createObjectURL(file);
+                    task.attachments.push({ id: fileId, name: file.name, url: fileUrl, type: file.type });
+                    attachmentNames.push(file.name);
+                }
+                addWorkflowEvent('file-added', task.id, { fileNames: attachmentNames });
+            }
+
+            saveTasks();
+
+            // Log assignee changes
+            const newAssignees = new Set(task.assignees);
+            const addedAssignees = oldAssignees.filter(id => !newAssignees.has(id));
+            const removedAssignees = [...newAssignees].filter(id => !oldAssignees.includes(id));
+
+            if (addedAssignees.length > 0) {
+                addWorkflowEvent('assignee-added', task.id, { assigneeIds: addedAssignees });
+            }
+            if (removedAssignees.length > 0) {
+                addWorkflowEvent('assignee-removed', task.id, { assigneeIds: removedAssignees });
+            }
+
+
+            showNotification('Task updated successfully!', 'success');
+            closeModal('editTaskModal');
+            openTaskDetailModal(task.id); // Show updated details
+            updateTasksView(); // Refresh task lists
+            updateAssignedTasksView();
+            updateDashboard();
+            updateDepartmentalDashboard();
+            updatePerformanceDashboard();
+        }
+
+        function removeAttachment(taskId, fileId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                const attachment = task.attachments.find(a => a.id === fileId);
+                if (attachment && confirm(`Are you sure you want to remove "${attachment.name}"?`)) {
+                    task.attachments = task.attachments.filter(a => a.id !== fileId);
+                    saveTasks();
+                    showNotification(`Attachment "${attachment.name}" removed.`, 'success');
+                    openEditTaskModal(taskId); // Re-render edit modal
+                }
+            }
+        }
+
+        function handleFileSelect(event) {
+            const previewContainer = document.getElementById('file-previews');
+            previewContainer.innerHTML = '';
+            const files = event.target.files;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    img.alt = file.name;
+                    img.className = 'file-preview';
+                    previewContainer.appendChild(img);
+                } else {
+                    const fileDiv = document.createElement('div');
+                    fileDiv.className = 'file-item';
+                    fileDiv.textContent = file.name;
+                    previewContainer.appendChild(fileDiv);
+                }
+            }
+        }
+
+        function handleFileSelectEdit(event) {
+            const previewContainer = document.getElementById('new-file-previews-edit');
+            previewContainer.innerHTML = ''; // Clear previous previews for new files
+            const files = event.target.files;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    img.alt = file.name;
+                    img.className = 'file-preview';
+                    previewContainer.appendChild(img);
+                } else {
+                    const fileDiv = document.createElement('div');
+                    fileDiv.className = 'file-item';
+                    fileDiv.textContent = file.name;
+                    previewContainer.appendChild(fileDiv);
+                }
+            }
+        }
+
+        // --- Organizational Hierarchy ---
+        function renderHierarchy() {
+            const hierarchyTree = document.getElementById('hierarchy-tree');
+            hierarchyTree.innerHTML = '';
+
+            // Group users by department and then by role hierarchy (simplified)
+            const departments = {};
+            users.forEach(user => {
+                if (!departments[user.department]) {
+                    departments[user.department] = [];
+                }
+                departments[user.department].push(user);
+            });
+
+            for (const deptName in departments) {
+                const departmentDiv = document.createElement('div');
+                departmentDiv.className = 'hierarchy-level level-0'; // Department level
+                departmentDiv.innerHTML = `<h3 class="card-title" style="margin-bottom: 15px; border-bottom: 1px solid var(--light-gray); padding-bottom: 10px;"><i class="material-icons">business</i> ${deptName} Department</h3>`;
+
+                // Sort users within department for consistent display (e.g., by role importance)
+                const sortedDeptUsers = departments[deptName].sort((a, b) => {
+                    const roleOrder = {
+                        'Department Head': 3,
+                        'Team Lead': 2,
+                        'Sales Representative': 1,
+                        'Marketing Specialist': 1,
+                        'HR Generalist': 1,
+                        'IT Support': 1
+                    };
+                    return (roleOrder[b.role] || 0) - (roleOrder[a.role] || 0);
+                });
+
+                sortedDeptUsers.forEach(user => {
+                    const userDiv = document.createElement('div');
+                    userDiv.className = 'hierarchy-item level-1'; // User level
+                    userDiv.innerHTML = `
+                        <div class="hierarchy-user-avatar">${user.avatar}</div>
+                        <div>
+                            <strong>${user.name}</strong>
+                            <span class="role-indicator">${user.role}</span>
+                        </div>
+                    `;
+                    departmentDiv.appendChild(userDiv);
+                });
+                hierarchyTree.appendChild(departmentDiv);
+            }
+        }
+
+        // --- Performance Dashboard ---
+        function updatePerformanceDashboard() {
+            renderTasksCompletedByDepartmentChart();
+            renderTaskCompletionTimeChart();
+            renderUserTaskDistributionChart();
+
+            const performanceStatsDiv = document.getElementById('performance-stats');
+            performanceStatsDiv.innerHTML = '';
+
+            const totalTasks = tasks.length;
+            const completedTasks = tasks.filter(t => t.status === 'Completed' || t.status === 'Done').length;
+            const overdueTasks = tasks.filter(t => new Date(t.dueDate) < new Date() && t.status !== 'Completed' && t.status !== 'Done').length;
+            const avgCompletionTime = tasks.filter(t => t.completedAt).reduce((sum, task) => {
+                const created = new Date(task.createdAt);
+                const completed = new Date(task.completedAt);
+                return sum + (completed - created) / (1000 * 60 * 60 * 24); // Days
+            }, 0) / (completedTasks || 1); // Avoid division by zero
+
+            const statsHtml = `
+                <div class="stat-item">
+                    <div class="stat-number">${totalTasks}</div>
+                    <div class="stat-label">Total Tasks</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">${completedTasks}</div>
+                    <div class="stat-label">Completed Tasks</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">${overdueTasks}</div>
+                    <div class="stat-label">Overdue Tasks</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">${avgCompletionTime.toFixed(1)}</div>
+                    <div class="stat-label">Avg. Completion Time (Days)</div>
+                </div>
+            `;
+            performanceStatsDiv.innerHTML = statsHtml;
+        }
+
+
+        // --- Accessibility & Settings ---
+        function toggleHighContrast() {
+            const body = document.body;
+            if (body.hasAttribute('high-contrast')) {
+                body.removeAttribute('high-contrast');
+                localStorage.setItem('highContrastMode', 'false');
+                showNotification('High Contrast Mode Off', 'info');
+            } else {
+                body.setAttribute('high-contrast', '');
+                localStorage.setItem('highContrastMode', 'true');
+                showNotification('High Contrast Mode On', 'info');
+            }
+        }
+
+        function applyHighContrastSetting() {
+            const savedSetting = localStorage.getItem('highContrastMode');
+            if (savedSetting === 'true') {
+                document.body.setAttribute('high-contrast', '');
+            }
+        }
+
+
+        // --- Event Listeners and Initial Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTasks();
+            loadWorkflowEvents();
+            applyHighContrastSetting();
+            initializeLogin();
+
+            // Populate sort-by options for My Tasks
+            const sortBySelect = document.getElementById('sort-by');
+            sortBySelect.innerHTML = `
+                <option value="createdAt">Sort by: Creation Date</option>
+                <option value="dueDate">Sort by: Due Date</option>
+                <option value="priority">Sort by: Priority</option>
+            `;
+            // Add initial options for priority and department filters
+            updateDepartmentFilters();
+            updatePriorityFilters();
+        });
+
+    </script>
+</body>
+</html>
